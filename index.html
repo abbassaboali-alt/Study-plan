@@ -238,19 +238,6 @@ textarea{
   cursor:pointer;
   font-family:Tajawal,sans-serif;
 }
-.cell-save{
-  margin-top:6px;
-  background:var(--blue);
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:6px 12px;
-  font-weight:900;
-  cursor:pointer;
-  font-size:12px;
-  font-family:Tajawal,sans-serif;
-}
-.cell-save:hover{background:var(--blue2)}
 
 .table-wrap{overflow-x:auto}
 table{
@@ -405,12 +392,6 @@ textarea{
   font-size:11px;
   line-height:1.25;
 }
-.cell-save{
-  margin-top:4px;
-  padding:4px 8px;
-  font-size:10px;
-  border-radius:7px;
-}
 .bulkBar textarea{
   min-height:46px;
 }
@@ -517,12 +498,45 @@ textarea{
   background:#fff;
 }
 
+.save-all-changes{
+  background:#198754;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  padding:11px 20px;
+  font-family:Tajawal,sans-serif;
+  font-weight:900;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  box-shadow:0 6px 16px rgba(25,135,84,.24);
+}
+.save-all-changes:hover{
+  background:#146c43;
+}
+.save-all-changes:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+.save-all-status{
+  display:none;
+  margin-bottom:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#eff6ff;
+  border:2px solid #bfdbfe;
+  color:#164478;
+  font-weight:900;
+  text-align:center;
+}
+textarea.plan-dirty{
+  outline:3px solid rgba(245,158,11,.35);
+  border-color:#f59e0b !important;
+}
+
 </style>
 <div class="top-buttons">
-  <button class="logout-badge" onclick="logout()">
-    <i class="fa-solid fa-right-from-bracket"></i>
-    Logout
-  </button>
 
   <button class="logout-badge" onclick="exportPlanPDF()">
     <i class="fa-solid fa-file-pdf"></i>
@@ -612,7 +626,27 @@ textarea{
   </div>
 
   <div class="box">
-    <h3>الخطة الدراسية</h3>
+    <div style="
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    ">
+      <h3 style="margin:0">الخطة الدراسية</h3>
+
+      <button
+        id="saveAllChangesBtn"
+        class="save-all-changes"
+        onclick="saveAllChanges()">
+        <i class="fa-solid fa-floppy-disk"></i>
+        حفظ جميع التعديلات
+      </button>
+    </div>
+
+    <div id="saveAllStatus" class="save-all-status"></div>
+
     <div id="planBox">
       <p class="note">⬅️ اختر فلتر لعرض الدورات</p>
     </div>
@@ -620,43 +654,6 @@ textarea{
 </div>
 
 <script>
-/* ================= AUTH ================= */
-function goLogin(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.replace("https://www.prudle-education.com/log-in-out");
-}
-
-function logout(){
-  goLogin();
-}
-
-function checkAdminSession(){
-  const u = localStorage.getItem("username");
-  const r = localStorage.getItem("role");
-  const d = localStorage.getItem("loginDate");
-  const today = new Date().toDateString();
-
-  if(!u || !r || d !== today){
-    goLogin();
-    return false;
-  }
-
-  if(r !== "admin"){
-    alert("Access Denied");
-    goLogin();
-    return false;
-  }
-
-  return true;
-}
-
-checkAdminSession();
-
-window.addEventListener("pageshow", function(){
-  checkAdminSession();
-});
-
 /* ================= FIREBASE ================= */
 firebase.initializeApp({
   apiKey:"AIzaSyCCFBvZosI8dwShZjxvZzI-SU5igEbcOKk",
@@ -1050,13 +1047,8 @@ else{
   data-week="${w}"
   data-day="${escapeHtml(d)}"
   onclick="setBulkTarget(${w}, '${escapeHtml(d)}')"
-  oninput="applyTextareaColor(this)"
+  oninput="markPlanChanged(this)"
 ></textarea>
-            <button
-              class="cell-save"
-              onclick="saveSingle('${escapeHtml(c.id)}', ${w}, '${escapeHtml(d)}', this.previousElementSibling)">
-              □ حفظ
-            </button>
           </td>`;
       });
 
@@ -1103,7 +1095,13 @@ async function loadStudyPlan(courseId){
           map[
             `${el.dataset.week}_${el.dataset.day}`
           ] || "";
-applyTextareaColor(el);
+
+        el.dataset.originalValue =
+          String(el.value || "");
+
+        el.classList.remove("plan-dirty");
+
+        applyTextareaColor(el);
       });
 
   }catch(err){
@@ -1126,53 +1124,178 @@ function setBulkTarget(week, day){
 
 }
 
-/* ================= SAVE SINGLE ================= */
-async function saveSingle(
-  courseId,
-  week,
-  day,
-  textarea
-){
+/* ================= SAVE ALL CHANGES ================= */
 
-  const activity =
-    String(textarea.value || "")
-      .trim();
+function markPlanChanged(textarea){
 
-  if(!activity){
+  applyTextareaColor(textarea);
 
-    alert("لا يوجد نص");
+  const original =
+    String(textarea.dataset.originalValue || "");
 
+  const current =
+    String(textarea.value || "");
+
+  textarea.classList.toggle(
+    "plan-dirty",
+    current !== original
+  );
+}
+
+async function saveAllChanges(){
+
+  const button =
+    document.getElementById("saveAllChangesBtn");
+
+  const status =
+    document.getElementById("saveAllStatus");
+
+  const textareas = [
+    ...document.querySelectorAll(
+      '#planBox textarea[data-course][data-week][data-day]'
+    )
+  ];
+
+  if(!textareas.length){
+    alert("لا توجد خطط ظاهرة للحفظ");
     return;
-
   }
+
+  const changed = textareas.filter(textarea=>{
+    const original =
+      String(textarea.dataset.originalValue || "");
+
+    const current =
+      String(textarea.value || "");
+
+    return current !== original;
+  });
+
+  if(!changed.length){
+    alert("لا توجد تعديلات جديدة للحفظ");
+    return;
+  }
+
+  const oldHtml = button.innerHTML;
+
+  button.disabled = true;
+  button.innerHTML =
+    '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+
+  status.style.display = "block";
+  status.style.background = "#eff6ff";
+  status.style.borderColor = "#bfdbfe";
+  status.style.color = "#164478";
+  status.textContent =
+    `جاري حفظ ${changed.length} تعديل...`;
 
   try{
 
-    await upsertStudyPlan(
-      courseId,
-      week,
-      day,
-      activity
-    );
+    let savedCount = 0;
+    let deletedCount = 0;
 
-    textarea.style.borderColor =
-      "#2ecc71";
+    const chunkSize = 400;
+
+    for(
+      let startIndex = 0;
+      startIndex < changed.length;
+      startIndex += chunkSize
+    ){
+
+      const chunk =
+        changed.slice(
+          startIndex,
+          startIndex + chunkSize
+        );
+
+      const batch = db.batch();
+
+      chunk.forEach(textarea=>{
+
+        const courseId =
+          String(textarea.dataset.course || "");
+
+        const week =
+          Number(textarea.dataset.week || 0);
+
+        const day =
+          String(textarea.dataset.day || "");
+
+        const activity =
+          String(textarea.value || "").trim();
+
+        const id =
+          `${courseId}_${week}_${day}`;
+
+        const ref =
+          db.collection("StudyPlans").doc(id);
+
+        if(activity){
+
+          batch.set(ref,{
+            courseId,
+            week,
+            day,
+            activity,
+            updatedAt:
+              firebase.firestore
+                .FieldValue
+                .serverTimestamp()
+          });
+
+          savedCount++;
+
+        }else{
+
+          batch.delete(ref);
+          deletedCount++;
+        }
+      });
+
+      await batch.commit();
+    }
+
+    changed.forEach(textarea=>{
+
+      textarea.dataset.originalValue =
+        String(textarea.value || "");
+
+      textarea.classList.remove("plan-dirty");
+
+      textarea.style.borderColor = "#2ecc71";
+
+      setTimeout(()=>{
+        textarea.style.borderColor = "#d7deea";
+      },900);
+    });
+
+    status.style.background = "#ecfdf5";
+    status.style.borderColor = "#86efac";
+    status.style.color = "#166534";
+    status.textContent =
+      `✅ تم حفظ جميع التعديلات — حفظ: ${savedCount} — حذف: ${deletedCount}`;
 
     setTimeout(()=>{
+      status.style.display = "none";
+    },3500);
 
-      textarea.style.borderColor =
-        "#d7deea";
+  }catch(error){
 
-    },800);
+    console.error(error);
 
-  }catch(err){
+    status.style.background = "#fef2f2";
+    status.style.borderColor = "#fecaca";
+    status.style.color = "#991b1b";
+    status.textContent =
+      "حدث خطأ أثناء حفظ التعديلات";
 
-    console.error(err);
+    alert("حدث خطأ أثناء حفظ جميع التعديلات");
 
-    alert("حدث خطأ أثناء الحفظ");
+  }finally{
 
+    button.disabled = false;
+    button.innerHTML = oldHtml;
   }
-
 }
 
 /* ================= BULK ================= */
