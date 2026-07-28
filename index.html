@@ -1,0 +1,2332 @@
+<style>
+/* =========================================================
+   PRUDLE — FULL WIDTH / FULL SCREEN + ULTRA NARROW MARGINS
+   Weebly / Caspio Safe + Mobile Friendly
+========================================================= */
+
+/* 1) الصفحة بكامل العرض بدون أي هوامش */
+html, body{
+  margin:0 !important;
+  padding:0 !important;
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+}
+
+/* 2) كل العناصر داخل الصفحة لا تكسر العرض */
+*,
+*::before,
+*::after{
+  box-sizing:border-box !important;
+}
+
+/* 3) كسر أي حاويات من القالب قد تقيد العرض */
+.container, .section, .wrapper, .content, .main-content,
+#page, #main, #body, #content,
+[class*="container"], [class*="wrapper"], [class*="content"]{
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* 4) هوامش داخلية عامة (تضييق الهوامش) */
+:root{
+  --gutter: 6px;          /* ✅ غيّرها 4px أو 8px حسب رغبتك */
+  --radius: 14px;
+}
+
+/* أي عنصر رئيسي في الصفحة خليه يستفيد من الـ gutter */
+body{
+  font-family:'Tajawal', sans-serif;
+  background:#f4f6fb;
+  padding:var(--gutter) !important;  /* ✅ يديك هامش صغير جدًا حول الصفحة */
+}
+
+/* 5) تقليل هوامش عناصر واجهتك (بدون ما تخرب التصميم) */
+.logout-badge,
+.header,
+.actions,
+.stats,
+.filters,
+.wrap{
+  margin:var(--gutter) !important;
+}
+
+/* 6) تحسين العرض على الجوال (هوامش أضيق + تكبير لمس) */
+@media (max-width: 768px){
+  :root{ --gutter: 4px; }
+  .header{ font-size:18px !important; }
+  .header img{ width:58px !important; height:58px !important; }
+  .btn{ padding:10px 12px !important; }
+}
+
+/* 7) الجدول: اجعله يتمدد ولا يخرج خارج الشاشة */
+table{
+  width:max-content;
+  max-width:100%;
+}
+.course-body{
+  overflow-x:auto !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* 8) منع أي عنصر يسبب سكرول أفقي بالقوة */
+img, video, canvas{
+  max-width:100% !important;
+  height:auto !important;
+}
+</style>
+
+<!-- ================= LOGOUT + PDF + PAGE ================= -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet" />
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore-compat.js"></script>
+
+<!-- PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+/* ================= RESET ================= */
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  overflow-x:hidden;
+  font-family:Tajawal,sans-serif;
+  background:#f4f6fb;
+}
+*{box-sizing:border-box}
+table,div,section{max-width:100%}
+
+/* ================= ROOT ================= */
+:root{
+  --blue:#164478;
+  --blue2:#1e5799;
+  --blink:#fff1c1;
+  --green:#2ecc71;
+  --red:#e74c3c;
+  --soft:#edf2ff;
+  --gold:#e67e22;
+}
+
+/* ================= TOP BUTTONS ================= */
+.top-buttons{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin:14px auto 0;
+  max-width:1400px;
+  padding:0 16px;
+}
+.logout-badge{
+  background:#164478;
+  color:#fff;
+  padding:7px 20px;
+  border-radius:30px;
+  border:none;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  box-shadow:0 3px 8px rgba(0,0,0,.18);
+  transition:.25s;
+  font-family:Tajawal,sans-serif;
+}
+.logout-badge:hover{
+  background:#1e5799;
+  transform:translateY(-2px);
+}
+
+/* ================= PAGE ================= */
+.page{
+  max-width:1400px;
+  margin:auto;
+  padding:16px;
+}
+header{
+  background:var(--blue);
+  color:#fff;
+  text-align:center;
+  padding:18px;
+  border-radius:16px;
+  font-weight:900;
+  font-size:22px;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+}
+.header-logo{
+  width:76px;
+  height:76px;
+  object-fit:contain;
+  margin-top:8px;
+  border-radius:12px;
+  background:#fff;
+  padding:4px;
+}
+.box{
+  background:#fff;
+  padding:16px;
+  border-radius:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
+  margin-top:14px;
+}
+.filters{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  background:#f6f8fb;
+  padding:14px;
+  border-radius:14px;
+  border:2px solid #e2e8f3;
+}
+select{
+  padding:12px;
+  border-radius:10px;
+  border:2px solid #d0d7e3;
+  font-weight:900;
+  font-family:Tajawal,sans-serif;
+  background:#fff;
+}
+select option.latest-start{
+  font-weight:900;
+  color:#d35400;
+}
+textarea{
+  width:100%;
+  min-height:60px;
+  border-radius:8px;
+  border:1px solid #d7deea;
+  padding:6px;
+  font-family:Tajawal,sans-serif;
+  font-weight:900;
+  resize:vertical;
+  background:#fff;
+}
+.bulkBar{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:10px;
+  align-items:stretch;
+}
+.bulk-save{
+  background:var(--green);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-weight:900;
+  padding:10px 18px;
+  cursor:pointer;
+  font-family:Tajawal,sans-serif;
+}
+.bulk-cancel{
+  background:var(--red);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-weight:900;
+  padding:10px 18px;
+  cursor:pointer;
+  font-family:Tajawal,sans-serif;
+}
+.cell-save{
+  margin-top:6px;
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:6px 12px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:12px;
+  font-family:Tajawal,sans-serif;
+}
+.cell-save:hover{background:var(--blue2)}
+
+.table-wrap{overflow-x:auto}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:900px;
+  margin-top:12px;
+}
+th,td{
+  border:2px solid var(--blue);
+  padding:8px;
+  text-align:center;
+  font-weight:800;
+  vertical-align:top;
+}
+th{
+  background:var(--blue);
+  color:#fff;
+}
+.current-week{animation:blink 1s infinite}
+@keyframes blink{
+  0%{background:var(--blink)}
+  50%{background:#fff}
+  100%{background:var(--blink)}
+}
+.note{
+  margin:6px 0;
+  font-weight:900;
+  color:#3b4a66;
+  line-height:1.8;
+}
+.target-box{
+  background:#fff3cd;
+  border:2px dashed var(--gold);
+  padding:12px;
+  border-radius:12px;
+  font-weight:900;
+  margin-top:10px;
+}
+.counter-box{
+  margin-top:10px;
+  background:var(--soft);
+  border:2px dashed #5c7cfa;
+  color:#2b4acb;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:900;
+  text-align:center;
+}
+.empty-box{
+  text-align:center;
+  padding:30px 10px;
+  color:#6b7280;
+  font-weight:900;
+}
+@media (max-width:900px){
+  .bulkBar{
+    grid-template-columns:1fr;
+  }
+  .top-buttons{
+    padding:0 10px;
+  }
+}
+
+/* ================= IMPROVED COMPACT DESIGN ================= */
+body{
+  background:linear-gradient(180deg,#eef4ff 0%,#f8fafc 42%,#f4f6fb 100%) !important;
+}
+.top-buttons{
+  background:#ffffff;
+  border:1px solid #dbe5f4;
+  border-radius:18px;
+  padding:10px 14px !important;
+  box-shadow:0 10px 28px rgba(22,68,120,.10);
+}
+.logout-badge{
+  min-height:38px;
+  padding:8px 18px;
+  border:1px solid rgba(255,255,255,.22);
+}
+.page{
+  max-width:1600px;
+  padding:10px;
+}
+header{
+  background:linear-gradient(135deg,#123963,#164478 55%,#1e5799);
+  border:1px solid rgba(255,255,255,.25);
+  padding:16px 18px;
+  letter-spacing:.2px;
+}
+.header-logo{
+  width:70px;
+  height:70px;
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+}
+.box{
+  border:1px solid #e2e8f0;
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+  padding:12px;
+}
+.filters{
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:8px;
+  padding:10px;
+}
+select{
+  padding:9px 10px;
+  font-size:13px;
+}
+.note{
+  background:#f8fbff;
+  border:1px solid #dbeafe;
+  border-right:5px solid var(--blue);
+  padding:8px 10px;
+  border-radius:12px;
+  margin-top:14px;
+  font-size:13px;
+}
+.table-wrap{
+  border:1px solid #dbe5f4;
+  border-radius:14px;
+  overflow:auto;
+  background:#fff;
+  margin-top:8px;
+}
+table{
+  width:100% !important;
+  min-width:760px !important;
+  margin-top:0 !important;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+th,td{
+  padding:4px 5px !important;
+  font-size:11px !important;
+  line-height:1.25 !important;
+  border:1px solid #164478 !important;
+}
+th{
+  position:sticky;
+  top:0;
+  z-index:2;
+}
+td:first-child, th:first-child{
+  width:72px;
+  white-space:nowrap;
+}
+textarea{
+  min-height:42px;
+  padding:5px;
+  font-size:11px;
+  line-height:1.25;
+}
+.cell-save{
+  margin-top:4px;
+  padding:4px 8px;
+  font-size:10px;
+  border-radius:7px;
+}
+.bulkBar textarea{
+  min-height:46px;
+}
+.counter-box,.target-box{
+  padding:8px 10px;
+  font-size:13px;
+}
+@media (max-width:768px){
+  .page{padding:6px;}
+  .box{padding:9px;border-radius:14px;}
+  table{min-width:680px !important;}
+  th,td{font-size:10.5px !important;padding:4px !important;}
+  textarea{min-height:38px;font-size:10.5px;}
+}
+.plan-final textarea{
+  background:#dc3545 !important;
+  color:#fff !important;
+  font-weight:900;
+}
+
+.plan-midterm textarea{
+  background:#ffc107 !important;
+  color:#000 !important;
+  font-weight:900;
+}
+
+.plan-quiz textarea{
+  background:#0d6efd !important;
+  color:#fff !important;
+  font-weight:900;
+}
+
+.plan-activity textarea{
+  background:#198754 !important;
+  color:#fff !important;
+  font-weight:900;
+}
+
+.plan-normal textarea{
+  background:#fff6d8 !important;
+  color:#111 !important;
+}
+
+.saved-plan-select{
+  min-width:260px;
+  min-height:40px;
+  padding:8px 12px;
+  border:2px solid #164478;
+  border-radius:12px;
+  background:#fff;
+  color:#164478;
+  font-weight:900;
+  font-family:Tajawal,sans-serif;
+}
+.saved-plan-apply-btn{
+  background:#198754;
+}
+.saved-plan-apply-btn:hover{
+  background:#146c43;
+}
+.import-old-plans-btn{
+  background:#7c3aed;
+}
+.import-old-plans-btn:hover{
+  background:#6d28d9;
+}
+.template-grid-wrap{
+  overflow:auto;
+  border:2px solid #dbeafe;
+  border-radius:14px;
+  background:#fff;
+  margin-top:12px;
+}
+.template-grid{
+  width:100% !important;
+  min-width:850px !important;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+.template-grid th,
+.template-grid td{
+  border:1px solid #164478 !important;
+  padding:5px !important;
+  text-align:center;
+}
+.template-grid textarea{
+  min-height:58px;
+  font-size:12px;
+}
+.template-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:16px;
+}
+.template-field{
+  width:100%;
+  padding:11px 12px;
+  border:2px solid #d0d7e3;
+  border-radius:10px;
+  font-family:Tajawal,sans-serif;
+  font-weight:900;
+  background:#fff;
+}
+
+</style>
+<div class="top-buttons">
+  <button class="logout-badge" onclick="logout()">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    Logout
+  </button>
+
+  <button class="logout-badge" onclick="exportPlanPDF()">
+    <i class="fa-solid fa-file-pdf"></i>
+    Export PDF
+  </button>
+<select id="savedPlanSelect" class="saved-plan-select">
+  <option value="">اختر خطة محفوظة</option>
+</select>
+
+<button
+  class="logout-badge"
+  onclick="openSavedPlanModal()">
+  <i class="fa-solid fa-folder-plus"></i>
+  إدارة الخطط المحفوظة
+</button>
+
+<button
+  class="logout-badge import-old-plans-btn"
+  onclick="importExistingCoursePlansAsTemplates()">
+  <i class="fa-solid fa-file-import"></i>
+  استيراد الخطط السابقة
+</button>
+
+<button
+  class="logout-badge saved-plan-apply-btn"
+  onclick="applySavedPlanToFilteredCourses()">
+  <i class="fa-solid fa-link"></i>
+  ربط الخطة بالدورات المفلترة
+</button>
+</div>
+
+<div id="pdfStatus" style="
+  display:none;
+  max-width:1400px;
+  margin:10px auto 0;
+  padding:12px 16px;
+  border-radius:14px;
+  background:#fff3cd;
+  border:2px solid #f59e0b;
+  color:#92400e;
+  font-weight:900;
+  text-align:center;
+">
+  جاري إصدار PDF... لا تغلق الصفحة
+</div>
+
+<div class="page">
+  <header>
+    الخطة الدراسية – الإدارة
+    <br>
+    <img
+      class="header-logo"
+      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJprpZXU4pTSCYXKhzWCpqdZ_mnPHMwqsACA&s"
+      alt="Prudle Logo"
+    />
+  </header>
+
+  <div class="box">
+    <div class="filters">
+      <select id="fBranch"><option value="">الفرع</option></select>
+      <select id="fSection"><option value="">القسم</option></select>
+      <select id="fTrainer"><option value="">المدرب</option></select>
+      <select id="fCourse"><option value="">الدورة</option></select>
+      <select id="fPeriod"><option value="">الفترة</option></select>
+      <select id="fStartDate"><option value="">تاريخ البدء</option></select>
+    </div>
+
+    <div class="counter-box">
+      إجمالي الدورات بعد الفلترة:
+      <span id="totalCount">0</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>□ التعديل الجماعي</h3>
+
+    <div class="target-box">
+      الخانة المستهدفة:
+      <span id="bulkTarget">غير محددة</span>
+    </div>
+
+    <div class="bulkBar" style="margin-top:10px">
+      <textarea id="bulkText" placeholder="اكتب النشاط ليتم تطبيقه على جميع الدورات المفلترة"></textarea>
+      <button class="bulk-save" onclick="applyBulk()">□ حفظ جماعي</button>
+      <button class="bulk-cancel" onclick="cancelBulk()">❌ إلغاء</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>الخطة الدراسية</h3>
+    <div id="planBox">
+      <p class="note">⬅️ اختر فلتر لعرض الدورات</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= AUTH ================= */
+function goLogin(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.replace("https://www.prudle-education.com/log-in-out");
+}
+
+function logout(){
+  goLogin();
+}
+
+function checkAdminSession(){
+  const u = localStorage.getItem("username");
+  const r = localStorage.getItem("role");
+  const d = localStorage.getItem("loginDate");
+  const today = new Date().toDateString();
+
+  if(!u || !r || d !== today){
+    goLogin();
+    return false;
+  }
+
+  if(r !== "admin"){
+    alert("Access Denied");
+    goLogin();
+    return false;
+  }
+
+  return true;
+}
+
+checkAdminSession();
+
+window.addEventListener("pageshow", function(){
+  checkAdminSession();
+});
+
+/* ================= FIREBASE ================= */
+firebase.initializeApp({
+  apiKey:"AIzaSyCCFBvZosI8dwShZjxvZzI-SU5igEbcOKk",
+  projectId:"prudle-system"
+});
+const db = firebase.firestore();
+
+/* ================= GLOBALS ================= */
+const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJprpZXU4pTSCYXKhzWCpqdZ_mnPHMwqsACA&s";
+
+let COURSES = [];
+let FILTERED_COURSES = [];
+let BULK_TARGET = null;
+let LATEST_5 = [];
+let SAVED_PLANS = [];
+let ACTIVE_TEMPLATE_ID = null;
+
+/* ================= HELPERS ================= */
+function escapeHtml(str){
+  return String(str ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function formatPeriodSort(v){
+  return String(v || "").trim();
+}
+function getCourseDuration(course){
+
+  const raw =
+    course.Duration ??
+    course.Weeks ??
+    course.duration ??
+    course.weeks ??
+    "";
+
+  const text =
+    String(raw)
+      .trim()
+      .toLowerCase();
+
+  /* قيمة رقمية مباشرة */
+  const numericValue = Number(text);
+
+  if(
+    Number.isFinite(numericValue) &&
+    numericValue > 0
+  ){
+    return numericValue;
+  }
+
+  /* القيم العربية */
+  if(
+    text === "أسبوع" ||
+    text === "اسبوع" ||
+    text === "أسبوع واحد" ||
+    text === "اسبوع واحد"
+  ){
+    return 1;
+  }
+
+  if(
+    text === "أسبوعان" ||
+    text === "اسبوعان" ||
+    text === "أسبوعين" ||
+    text === "اسبوعين"
+  ){
+    return 2;
+  }
+
+  /* القيم الإنجليزية */
+  if(
+    text === "1 week" ||
+    text === "one week"
+  ){
+    return 1;
+  }
+
+  if(
+    text === "2 weeks" ||
+    text === "two weeks"
+  ){
+    return 2;
+  }
+
+  /* استخراج أي رقم داخل النص */
+  const match =
+    text.match(/\d+/);
+
+  if(match){
+
+    const extracted =
+      Number(match[0]);
+
+    if(
+      Number.isFinite(extracted) &&
+      extracted > 0
+    ){
+      return extracted;
+    }
+
+  }
+
+  /* مدة افتراضية عند عدم وجود قيمة صالحة */
+  return 8;
+}
+
+function getCurrentWeek(startDate, duration){
+  const start = new Date(startDate || 0);
+  const now = new Date();
+
+  if(isNaN(start.getTime())) return -1;
+
+  const diffWeeks = Math.floor((now - start) / (1000*60*60*24*7)) + 1;
+
+  if(diffWeeks < 1 || diffWeeks > duration) return -1;
+  return diffWeeks;
+}
+
+async function upsertStudyPlan(
+  courseId,
+  week,
+  day,
+  activity
+){
+
+  const id =
+    `${courseId}_${week}_${day}`;
+
+  await db
+    .collection("StudyPlans")
+    .doc(id)
+    .set({
+
+      courseId,
+      week,
+      day,
+      activity,
+
+      updatedAt:
+        firebase.firestore
+          .FieldValue
+          .serverTimestamp()
+
+    });
+
+}
+
+async function tryAddImage(doc, url, x, y, w, h){
+  try{
+    const dataUrl = await urlToDataURL(url);
+    doc.addImage(dataUrl, "PNG", x, y, w, h);
+    return true;
+  }catch(e){
+    console.warn("Logo failed:", e);
+    return false;
+  }
+}
+
+function urlToDataURL(url){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function(){
+      try{
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      }catch(err){
+        reject(err);
+      }
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+/* ================= LOAD COURSES ================= */
+async function loadCourses(){
+  try{
+    const snap = await db.collection("Courses").get();
+    COURSES = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    buildFilters();
+    await loadSavedPlans();
+  }catch(err){
+    console.error(err);
+    alert("حدث خطأ أثناء تحميل الدورات");
+  }
+}
+loadCourses();
+
+/* ================= FILTERS ================= */
+function buildFilters(){
+  fill("fBranch","Branch");
+  fill("fSection","Section");
+  fill("fTrainer","Trainer");
+  fill("fCourse","TrainingCourse");
+  fill("fPeriod","Period");
+  fillDates();
+}
+
+function fill(id,key){
+  const el = document.getElementById(id);
+  const firstLabel = el.options[0] ? el.options[0].text : "";
+
+  const vals = [...new Set(COURSES.map(x => x[key]).filter(Boolean))]
+    .sort((a,b)=>String(a).localeCompare(String(b),"ar"));
+
+  el.innerHTML = `<option value="">${firstLabel}</option>`;
+
+  vals.forEach(v=>{
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = v;
+    el.appendChild(o);
+  });
+
+  el.onchange = applyFilters;
+}
+
+function fillDates(){
+  const el = document.getElementById("fStartDate");
+
+  const dates = [...new Set(COURSES.map(c => c.StartingDate).filter(Boolean))]
+    .sort((a,b)=>new Date(b) - new Date(a));
+
+  LATEST_5 = dates.slice(0,5);
+
+  el.innerHTML = '<option value="">تاريخ البدء</option>';
+
+  dates.forEach(d=>{
+    const o = document.createElement("option");
+    o.value = d;
+
+    if(LATEST_5.includes(d)){
+      o.textContent = `□ ${d}`;
+      o.classList.add("latest-start");
+    }else{
+      o.textContent = d;
+    }
+
+    el.appendChild(o);
+  });
+
+  el.onchange = applyFilters;
+}
+
+/* ================= APPLY FILTERS ================= */
+function applyFilters(){
+  const fBranch = document.getElementById("fBranch");
+  const fSection = document.getElementById("fSection");
+  const fTrainer = document.getElementById("fTrainer");
+  const fCourse = document.getElementById("fCourse");
+  const fPeriod = document.getElementById("fPeriod");
+  const fStartDate = document.getElementById("fStartDate");
+  const totalCount = document.getElementById("totalCount");
+
+  FILTERED_COURSES = COURSES.filter(c =>
+    (!fBranch.value || c.Branch === fBranch.value) &&
+    (!fSection.value || c.Section === fSection.value) &&
+    (!fTrainer.value || c.Trainer === fTrainer.value) &&
+    (!fCourse.value || c.TrainingCourse === fCourse.value) &&
+    (!fPeriod.value || c.Period === fPeriod.value) &&
+    (!fStartDate.value || c.StartingDate === fStartDate.value)
+  );
+
+  FILTERED_COURSES.sort((a,b)=>formatPeriodSort(a.Period).localeCompare(formatPeriodSort(b.Period),"ar"));
+
+  totalCount.textContent = FILTERED_COURSES.length;
+  renderPlans(FILTERED_COURSES);
+}
+function getPlanColorClass(text){
+
+  const t = String(text || "").trim().toLowerCase();
+
+  if(!t) return "";
+
+  if(t.includes("final exam") || t.includes("final")){
+    return "plan-final";
+  }
+
+  if(t.includes("midterm exam") || t.includes("midterm")){
+    return "plan-midterm";
+  }
+
+  if(t.includes("quiz")){
+    return "plan-quiz";
+  }
+
+  if(
+    t.includes("activity") ||
+    t.includes("reading") ||
+    t.includes("listening") ||
+    t.includes("speaking") ||
+    t.includes("writing") ||
+    t.includes("vocabulary") ||
+    t.includes("grammar") ||
+    t.includes("skills")
+  ){
+    return "plan-activity";
+  }
+
+  return "plan-normal";
+}
+
+function applyTextareaColor(textarea){
+
+  const td = textarea.closest("td");
+  if(!td) return;
+
+  td.classList.remove(
+    "plan-final",
+    "plan-midterm",
+    "plan-quiz",
+    "plan-activity",
+    "plan-normal"
+  );
+
+  const cls = getPlanColorClass(textarea.value);
+  if(cls) td.classList.add(cls);
+}
+/* ================= RENDER ================= */
+function renderPlans(list){
+  const planBox = document.getElementById("planBox");
+  planBox.innerHTML = "";
+
+  if(!list.length){
+    planBox.innerHTML = '<div class="empty-box">لا توجد دورات</div>';
+    return;
+  }
+
+  list.forEach(c=>{
+    const days = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
+    const duration =
+  getCourseDuration(c);
+let durationLabel = "";
+
+if(duration === 1){
+  durationLabel = "1 Week";
+}
+else if(duration === 2){
+  durationLabel = "2 Weeks";
+}
+else if(duration === 3){
+  durationLabel = "3 Weeks";
+}
+else if(duration === 4){
+  durationLabel = "4 Weeks";
+}
+else if(duration === 6){
+  durationLabel = "6 Weeks";
+}
+else{
+  durationLabel = `${duration} Weeks`;
+}
+    const currentWeek = getCurrentWeek(c.StartingDate, duration);
+
+    let html = `
+      <div class="note">
+        <b>الدورة:</b> ${escapeHtml(c.TrainingCourse || "-")} |
+        <b>المدرب:</b> ${escapeHtml(c.Trainer || "-")} |
+        <b>الفترة:</b> ${escapeHtml(c.Period || "-")} |
+        <b>تاريخ البدء:</b> ${escapeHtml(c.StartingDate || "-")} |
+        <b>الفرع:</b> ${escapeHtml(c.Branch || "-")} |
+        <b>القسم:</b> ${escapeHtml(c.Section || "-")}
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>الأسبوع</th>`;
+
+    days.forEach(d => html += `<th>${escapeHtml(d)}</th>`);
+    html += `</tr>`;
+
+    for(let w=1; w<=duration; w++){
+      html += `<tr class="${w===currentWeek ? 'current-week' : ''}">
+        <td>الأسبوع ${w}</td>`;
+
+      days.forEach(d=>{
+        html += `
+          <td>
+        <textarea
+  data-course="${escapeHtml(c.id)}"
+  data-week="${w}"
+  data-day="${escapeHtml(d)}"
+  onclick="setBulkTarget(${w}, '${escapeHtml(d)}')"
+  oninput="applyTextareaColor(this)"
+></textarea>
+            <button
+              class="cell-save"
+              onclick="saveSingle('${escapeHtml(c.id)}', ${w}, '${escapeHtml(d)}', this.previousElementSibling)">
+              □ حفظ
+            </button>
+          </td>`;
+      });
+
+      html += `</tr>`;
+    }
+
+    html += `
+        </table>
+      </div>
+    `;
+
+    planBox.insertAdjacentHTML("beforeend", html);
+    loadStudyPlan(c.id);
+  });
+}
+
+/* ================= LOAD SAVED ================= */
+async function loadStudyPlan(courseId){
+
+  try{
+
+    const snap = await db.collection("StudyPlans")
+      .where("courseId","==",courseId)
+      .get();
+
+    const map = {};
+
+    snap.forEach(d=>{
+
+      const p = d.data() || {};
+
+      map[`${p.week}_${p.day}`] =
+        p.activity || "";
+
+    });
+
+    document
+      .querySelectorAll(
+        `textarea[data-course="${courseId}"]`
+      )
+      .forEach(el=>{
+
+        el.value =
+          map[
+            `${el.dataset.week}_${el.dataset.day}`
+          ] || "";
+applyTextareaColor(el);
+      });
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+/* ================= TARGET ================= */
+function setBulkTarget(week, day){
+
+  BULK_TARGET = {week, day};
+
+  document.getElementById(
+    "bulkTarget"
+  ).textContent =
+    `الأسبوع ${week} – ${day}`;
+
+}
+
+/* ================= SAVE SINGLE ================= */
+async function saveSingle(
+  courseId,
+  week,
+  day,
+  textarea
+){
+
+  const activity =
+    String(textarea.value || "")
+      .trim();
+
+  if(!activity){
+
+    alert("لا يوجد نص");
+
+    return;
+
+  }
+
+  try{
+
+    await upsertStudyPlan(
+      courseId,
+      week,
+      day,
+      activity
+    );
+
+    textarea.style.borderColor =
+      "#2ecc71";
+
+    setTimeout(()=>{
+
+      textarea.style.borderColor =
+        "#d7deea";
+
+    },800);
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("حدث خطأ أثناء الحفظ");
+
+  }
+
+}
+
+/* ================= BULK ================= */
+async function applyBulk(){
+
+  if(!BULK_TARGET){
+
+    alert(
+      "حدد الأسبوع واليوم أولاً"
+    );
+
+    return;
+
+  }
+
+  if(!FILTERED_COURSES.length){
+
+    alert(
+      "لا توجد دورات مفلترة"
+    );
+
+    return;
+
+  }
+
+  const text =
+    String(
+      document.getElementById(
+        "bulkText"
+      ).value || ""
+    ).trim();
+
+  if(!text){
+
+    alert("اكتب النشاط");
+
+    return;
+
+  }
+
+  const {week, day} = BULK_TARGET;
+
+  for(const c of FILTERED_COURSES){
+
+    await upsertStudyPlan(
+      c.id,
+      week,
+      day,
+      text
+    );
+
+  }
+
+  for(const c of FILTERED_COURSES){
+
+    await loadStudyPlan(c.id);
+
+  }
+
+  alert("✅ تم الحفظ الجماعي");
+
+}
+
+/* ================= CANCEL ================= */
+function cancelBulk(){
+
+  BULK_TARGET = null;
+
+  document.getElementById(
+    "bulkTarget"
+  ).textContent =
+    "غير محددة";
+
+  document.getElementById(
+    "bulkText"
+  ).value = "";
+
+}
+
+/* ================= PDF ================= */
+async function exportPlanPDF(){
+
+  const statusBox = document.getElementById("pdfStatus");
+
+  try{
+
+    if(!FILTERED_COURSES.length){
+      alert("لا توجد دورات");
+      return;
+    }
+
+    if(statusBox){
+      statusBox.style.display = "block";
+      statusBox.textContent = "جاري تجهيز PDF بتصميم مضغوط مع الشعار...";
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 80));
+
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4",
+      compress:true
+    });
+
+    const BLUE = [22,68,120];
+    const BLUE_DARK = [13,47,82];
+    const LIGHT = [245,248,252];
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+
+    const sortedCourses = [...FILTERED_COURSES].sort((a,b)=>
+      String(a.TrainingCourse || "").localeCompare(
+        String(b.TrainingCourse || ""),
+        "en",
+        {sensitivity:"base"}
+      )
+    );
+
+    if(statusBox){
+      statusBox.textContent = "جاري تحميل الشعار مرة واحدة...";
+    }
+
+    let logoData = null;
+    try{
+      logoData = await urlToDataURL(LOGO_URL);
+    }catch(e){
+      console.warn("Logo failed:", e);
+      logoData = null;
+    }
+
+    if(statusBox){
+      statusBox.textContent = "جاري تحميل الخطط من قاعدة البيانات...";
+    }
+
+    const courseIds = new Set(sortedCourses.map(c => String(c.id)));
+    const plansByCourse = {};
+
+    const allPlansSnap = await db.collection("StudyPlans").get();
+
+    allPlansSnap.forEach(d=>{
+      const p = d.data() || {};
+      const cid = String(p.courseId || "");
+
+      if(!courseIds.has(cid)) return;
+
+      if(!plansByCourse[cid]) plansByCourse[cid] = {};
+      plansByCourse[cid][`${p.week}_${p.day}`] = p.activity || "";
+    });
+
+    let first = true;
+    let index = 0;
+
+    for(const course of sortedCourses){
+
+      index++;
+
+      if(statusBox){
+        statusBox.textContent = `جاري إصدار PDF للدورة ${index} من ${sortedCourses.length}...`;
+      }
+
+      if(!first) doc.addPage();
+      first = false;
+
+      const duration =
+  getCourseDuration(course);
+
+      // ===== Header compact with logo =====
+      doc.setFillColor(...BLUE);
+      doc.rect(0,0,W,22,"F");
+
+      if(logoData){
+        doc.setFillColor(255,255,255);
+        doc.roundedRect(8,3,17,16,2,2,"F");
+        doc.addImage(logoData,"PNG",10,4.5,13,13);
+      }else{
+        doc.setTextColor(255,255,255);
+        doc.setFont("helvetica","bold");
+        doc.setFontSize(9);
+        doc.text("PRUDLE", 10, 13);
+      }
+
+      doc.setTextColor(255,255,255);
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(17);
+      doc.text("PRUDLE STUDY PLAN", W/2, 9, {align:"center"});
+
+      doc.setFontSize(10);
+      doc.text(String(course.TrainingCourse || "-"), W/2, 17, {align:"center"});
+
+      // ===== Course details in compact chips =====
+      doc.setTextColor(20,30,45);
+      doc.setFontSize(8);
+      doc.setFont("helvetica","bold");
+
+      const details = [
+        `Course: ${course.TrainingCourse || "-"}`,
+        `Trainer: ${course.Trainer || "-"}`,
+        `Period: ${course.Period || "-"}`,
+        `Start: ${course.StartingDate || "-"}`,
+        `Duration: ${duration} Weeks`,
+        `Branch: ${course.Branch || "-"}`,
+        `Section: ${course.Section || "-"}`
+      ];
+
+      let x = 8;
+      let y = 27;
+      details.forEach((txt)=>{
+        const clean = String(txt).slice(0,48);
+        const chipW = Math.min(Math.max(doc.getTextWidth(clean) + 7, 30), 78);
+        if(x + chipW > W - 8){
+          x = 8;
+          y += 7;
+        }
+        doc.setFillColor(...LIGHT);
+        doc.setDrawColor(210,220,235);
+        doc.roundedRect(x, y-4.5, chipW, 6, 1.5, 1.5, "FD");
+        doc.text(clean, x+3, y);
+        x += chipW + 3;
+      });
+
+      const map = plansByCourse[String(course.id)] || {};
+
+      const daysAR = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
+      const daysEN = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
+
+      const head = [["Week", ...daysEN]];
+      const body = [];
+
+      for(let w=1; w<=duration; w++){
+        const row = [`Week ${w}`];
+        daysAR.forEach(day=>{
+          row.push(String(map[`${w}_${day}`] || "").trim());
+        });
+        body.push(row);
+      }
+
+      const tableStartY = Math.max(42, y + 6);
+      const marginX = 6;
+      const usableW = W - (marginX*2);
+      const weekW = 18;
+      const dayW = (usableW - weekW) / 5;
+
+      doc.autoTable({
+        startY:tableStartY,
+        theme:"grid",
+        head,
+        body,
+        margin:{left:marginX,right:marginX,bottom:18},
+        tableWidth:usableW,
+        pageBreak:"auto",
+        rowPageBreak:"avoid",
+        headStyles:{
+          fillColor:BLUE,
+          textColor:[255,255,255],
+          fontStyle:"bold",
+          halign:"center",
+          valign:"middle",
+          fontSize:7.5,
+          cellPadding:1.8,
+          minCellHeight:6
+        },
+        styles:{
+          font:"helvetica",
+          fontSize:6.8,
+          cellPadding:1.6,
+          minCellHeight:6.2,
+          halign:"center",
+          valign:"middle",
+          overflow:"linebreak",
+          lineColor:[190,205,225],
+          lineWidth:0.16
+        },
+        alternateRowStyles:{
+          fillColor:[250,252,255]
+        },
+        columnStyles:{
+          0:{cellWidth:weekW,fontStyle:"bold",fillColor:[235,241,250],textColor:BLUE_DARK},
+          1:{cellWidth:dayW},
+          2:{cellWidth:dayW},
+          3:{cellWidth:dayW},
+          4:{cellWidth:dayW},
+          5:{cellWidth:dayW}
+        },
+        didParseCell:function(data){
+
+          if(data.section === "body" && data.column.index > 0){
+
+            const txt = String(data.cell.raw || "").trim().toLowerCase();
+
+            if(txt.includes("final exam") || txt.includes("final")){
+              data.cell.styles.fillColor = [220,53,69];
+              data.cell.styles.textColor = [255,255,255];
+              data.cell.styles.fontStyle = "bold";
+            }
+            else if(txt.includes("midterm exam") || txt.includes("midterm")){
+              data.cell.styles.fillColor = [255,193,7];
+              data.cell.styles.textColor = [0,0,0];
+              data.cell.styles.fontStyle = "bold";
+            }
+            else if(txt.includes("quiz")){
+              data.cell.styles.fillColor = [13,110,253];
+              data.cell.styles.textColor = [255,255,255];
+              data.cell.styles.fontStyle = "bold";
+            }
+            else if(
+              txt.includes("activity") ||
+              txt.includes("reading") ||
+              txt.includes("listening") ||
+              txt.includes("speaking") ||
+              txt.includes("writing") ||
+              txt.includes("vocabulary") ||
+              txt.includes("grammar")
+            ){
+              data.cell.styles.fillColor = [25,135,84];
+              data.cell.styles.textColor = [255,255,255];
+              data.cell.styles.fontStyle = "bold";
+            }
+            else if(txt){
+              data.cell.styles.fillColor = [255,250,225];
+              data.cell.styles.textColor = [35,35,35];
+            }
+          }
+        },
+        didDrawPage:function(){
+          doc.setFontSize(7);
+          doc.setTextColor(120);
+          doc.text("Prudle Institute - Study Plan", marginX, H-6);
+          doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, W-marginX, H-6, {align:"right"});
+        }
+      });
+
+      // ===== Compact color guide =====
+      let finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY : tableStartY) + 6;
+
+      if(finalY > H - 20){
+        finalY = H - 18;
+      }
+
+      doc.setFontSize(7.2);
+      doc.setTextColor(0);
+      doc.setFont("helvetica","bold");
+      doc.text("Color Guide:", marginX, finalY);
+
+      const guide = [
+        {c:[220,53,69], t:"Final"},
+        {c:[255,193,7], t:"Midterm"},
+        {c:[13,110,253], t:"Quiz"},
+        {c:[25,135,84], t:"Activity / Skills"}
+      ];
+
+      let gx = marginX + 24;
+      guide.forEach(g=>{
+        doc.setFillColor(...g.c);
+        doc.rect(gx, finalY-4, 4, 4, "F");
+        doc.setTextColor(0);
+        doc.text(g.t, gx+6, finalY);
+        gx += doc.getTextWidth(g.t) + 18;
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 15));
+    }
+
+    if(statusBox){
+      statusBox.textContent = "جاري تنزيل ملف PDF...";
+    }
+
+    doc.save("Prudle_StudyPlan_Report.pdf");
+
+  }catch(err){
+
+    console.error(err);
+    alert("حدث خطأ أثناء إصدار PDF");
+
+  }finally{
+
+    if(statusBox){
+      setTimeout(()=>{
+        statusBox.style.display = "none";
+      }, 1200);
+    }
+
+  }
+}
+
+
+
+/* ================= SAVED STUDY PLAN TEMPLATES ================= */
+
+async function loadSavedPlans(){
+  try{
+    const snap = await db.collection("StudyPlanTemplates").get();
+
+    SAVED_PLANS = snap.docs
+      .map(doc=>({
+        id:doc.id,
+        ...doc.data()
+      }))
+      .sort((a,b)=>
+        String(a.name || "").localeCompare(
+          String(b.name || ""),
+          "ar"
+        )
+      );
+
+    buildSavedPlanDropdown();
+
+  }catch(error){
+    console.error("Could not load saved plans:",error);
+  }
+}
+
+function buildSavedPlanDropdown(){
+  const select =
+    document.getElementById("savedPlanSelect");
+
+  if(!select) return;
+
+  const oldValue = select.value;
+
+  select.innerHTML =
+    '<option value="">اختر خطة محفوظة</option>';
+
+  SAVED_PLANS.forEach(plan=>{
+    const option =
+      document.createElement("option");
+
+    option.value = plan.id;
+    option.textContent =
+      `${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
+
+    select.appendChild(option);
+  });
+
+  if(SAVED_PLANS.some(plan=>plan.id === oldValue)){
+    select.value = oldValue;
+  }
+}
+
+function openSavedPlanModal(planId = ""){
+  const modal =
+    document.getElementById("savedPlanModal");
+
+  if(!modal) return;
+
+  ACTIVE_TEMPLATE_ID = planId || null;
+
+  const nameInput =
+    document.getElementById("templateName");
+
+  const durationSelect =
+    document.getElementById("templateDuration");
+
+  const deleteButton =
+    document.getElementById("deleteTemplateBtn");
+
+  let selectedPlan = null;
+
+  if(planId){
+    selectedPlan =
+      SAVED_PLANS.find(plan=>plan.id === planId) || null;
+  }else{
+    const selectedId =
+      document.getElementById("savedPlanSelect")?.value || "";
+
+    if(selectedId){
+      selectedPlan =
+        SAVED_PLANS.find(plan=>plan.id === selectedId) || null;
+
+      ACTIVE_TEMPLATE_ID =
+        selectedPlan?.id || null;
+    }
+  }
+
+  nameInput.value =
+    selectedPlan?.name || "";
+
+  durationSelect.value =
+    String(
+      Number(selectedPlan?.duration || 8)
+    );
+
+  if(deleteButton){
+    deleteButton.style.display =
+      selectedPlan ? "inline-flex" : "none";
+  }
+
+  renderTemplateEditor(
+    Number(durationSelect.value),
+    selectedPlan?.items || []
+  );
+
+  durationSelect.onchange = function(){
+    const currentItems =
+      collectTemplateItems(false);
+
+    renderTemplateEditor(
+      Number(this.value),
+      currentItems
+    );
+  };
+
+  modal.style.display = "flex";
+}
+
+function closeSavedPlanModal(){
+  const modal =
+    document.getElementById("savedPlanModal");
+
+  if(modal){
+    modal.style.display = "none";
+  }
+
+  ACTIVE_TEMPLATE_ID = null;
+}
+
+function createNewSavedPlan(){
+  document.getElementById("savedPlanSelect").value = "";
+  ACTIVE_TEMPLATE_ID = null;
+  openSavedPlanModal("");
+}
+
+function editSelectedSavedPlan(){
+  const id =
+    document.getElementById("savedPlanSelect").value;
+
+  if(!id){
+    alert("اختر خطة محفوظة أولاً");
+    return;
+  }
+
+  openSavedPlanModal(id);
+}
+
+function renderTemplateEditor(duration,items = []){
+  const box =
+    document.getElementById("templateEditorBox");
+
+  if(!box) return;
+
+  const days = [
+    "الأحد",
+    "الاثنين",
+    "الثلاثاء",
+    "الأربعاء",
+    "الخميس"
+  ];
+
+  const itemMap = {};
+
+  items.forEach(item=>{
+    itemMap[
+      `${Number(item.week)}_${String(item.day || "")}`
+    ] = String(item.activity || "");
+  });
+
+  let html = `
+    <div class="template-grid-wrap">
+      <table class="template-grid">
+        <thead>
+          <tr>
+            <th style="width:85px">الأسبوع</th>
+  `;
+
+  days.forEach(day=>{
+    html += `<th>${escapeHtml(day)}</th>`;
+  });
+
+  html += `
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  for(let week = 1; week <= duration; week++){
+    html += `
+      <tr>
+        <td><b>الأسبوع ${week}</b></td>
+    `;
+
+    days.forEach(day=>{
+      const value =
+        itemMap[`${week}_${day}`] || "";
+
+      html += `
+        <td>
+          <textarea
+            class="templateActivity"
+            data-week="${week}"
+            data-day="${escapeHtml(day)}"
+            oninput="applyTextareaColor(this)"
+          >${escapeHtml(value)}</textarea>
+        </td>
+      `;
+    });
+
+    html += `</tr>`;
+  }
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  box.innerHTML = html;
+
+  box
+    .querySelectorAll(".templateActivity")
+    .forEach(applyTextareaColor);
+}
+
+function collectTemplateItems(skipEmpty = true){
+  const items = [];
+
+  document
+    .querySelectorAll("#templateEditorBox .templateActivity")
+    .forEach(textarea=>{
+      const activity =
+        String(textarea.value || "").trim();
+
+      if(skipEmpty && !activity) return;
+
+      items.push({
+        week:Number(textarea.dataset.week || 0),
+        day:String(textarea.dataset.day || ""),
+        activity
+      });
+    });
+
+  return items;
+}
+
+async function saveStudyPlanTemplate(){
+  const name =
+    String(
+      document.getElementById("templateName").value || ""
+    ).trim();
+
+  const duration =
+    Number(
+      document.getElementById("templateDuration").value || 0
+    );
+
+  if(!name){
+    alert("اكتب اسم الخطة");
+    return;
+  }
+
+  if(!duration || duration < 1){
+    alert("اختر مدة صحيحة للخطة");
+    return;
+  }
+
+  const items =
+    collectTemplateItems(true);
+
+  if(!items.length){
+    alert("أدخل نشاطاً واحداً على الأقل");
+    return;
+  }
+
+  try{
+    const payload = {
+      name,
+      duration,
+      items,
+      updatedAt:
+        firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    let savedId = ACTIVE_TEMPLATE_ID;
+
+    if(savedId){
+      await db
+        .collection("StudyPlanTemplates")
+        .doc(savedId)
+        .set(payload,{merge:true});
+    }else{
+      payload.createdAt =
+        firebase.firestore.FieldValue.serverTimestamp();
+
+      const ref = await db
+        .collection("StudyPlanTemplates")
+        .add(payload);
+
+      savedId = ref.id;
+    }
+
+    await loadSavedPlans();
+
+    document.getElementById("savedPlanSelect").value =
+      savedId;
+
+    ACTIVE_TEMPLATE_ID = savedId;
+
+    alert("✅ تم حفظ الخطة الدراسية");
+
+    closeSavedPlanModal();
+
+  }catch(error){
+    console.error(error);
+    alert("حدث خطأ أثناء حفظ الخطة");
+  }
+}
+
+async function deleteSavedPlanTemplate(){
+  if(!ACTIVE_TEMPLATE_ID){
+    alert("لا توجد خطة محددة للحذف");
+    return;
+  }
+
+  if(!confirm("هل تريد حذف الخطة المحفوظة؟")){
+    return;
+  }
+
+  try{
+    await db
+      .collection("StudyPlanTemplates")
+      .doc(ACTIVE_TEMPLATE_ID)
+      .delete();
+
+    await loadSavedPlans();
+
+    document.getElementById("savedPlanSelect").value = "";
+
+    closeSavedPlanModal();
+
+    alert("✅ تم حذف الخطة المحفوظة");
+
+  }catch(error){
+    console.error(error);
+    alert("حدث خطأ أثناء حذف الخطة");
+  }
+}
+
+
+function normalizeTemplateItems(items){
+  return [...items]
+    .map(item=>({
+      week:Number(item.week || 0),
+      day:String(item.day || "").trim(),
+      activity:String(item.activity || "").trim()
+    }))
+    .filter(item=>
+      item.week > 0 &&
+      item.day &&
+      item.activity
+    )
+    .sort((a,b)=>{
+      if(a.week !== b.week){
+        return a.week - b.week;
+      }
+
+      return a.day.localeCompare(b.day,"ar");
+    });
+}
+
+function createTemplateSignature(items){
+  return JSON.stringify(
+    normalizeTemplateItems(items)
+  );
+}
+
+function buildImportedTemplateName(course){
+  const parts = [
+    course.TrainingCourse,
+    course.Section,
+    course.Branch,
+    course.Period,
+    course.StartingDate
+  ]
+    .map(value=>String(value || "").trim())
+    .filter(Boolean);
+
+  return parts.length
+    ? `خطة ${parts.join(" - ")}`
+    : "خطة دراسية مستوردة";
+}
+
+async function importExistingCoursePlansAsTemplates(){
+
+  if(!COURSES.length){
+    alert("لا توجد دورات متاحة");
+    return;
+  }
+
+  const confirmed = confirm(
+    "سيتم تحويل الخطط السابقة الموجودة داخل الدورات إلى خطط محفوظة مستقلة. لن يتم حذف أو تغيير الخطط الحالية في الدورات. هل تريد المتابعة؟"
+  );
+
+  if(!confirmed){
+    return;
+  }
+
+  const button =
+    document.querySelector(".import-old-plans-btn");
+
+  const oldButtonHtml =
+    button ? button.innerHTML : "";
+
+  if(button){
+    button.disabled = true;
+    button.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاستيراد...';
+  }
+
+  try{
+
+    /*
+      تحميل جميع الخطط السابقة مرة واحدة.
+    */
+    const plansSnap =
+      await db.collection("StudyPlans").get();
+
+    const plansByCourse = {};
+
+    plansSnap.forEach(doc=>{
+      const data = doc.data() || {};
+      const courseId =
+        String(data.courseId || "").trim();
+
+      const activity =
+        String(data.activity || "").trim();
+
+      if(!courseId || !activity){
+        return;
+      }
+
+      if(!plansByCourse[courseId]){
+        plansByCourse[courseId] = [];
+      }
+
+      plansByCourse[courseId].push({
+        week:Number(data.week || 0),
+        day:String(data.day || "").trim(),
+        activity
+      });
+    });
+
+    /*
+      التوقيعات الموجودة تمنع تكرار خطة سبق حفظها.
+    */
+    const existingSignatures = new Set(
+      SAVED_PLANS.map(plan=>
+        createTemplateSignature(
+          Array.isArray(plan.items)
+            ? plan.items
+            : []
+        )
+      )
+    );
+
+    let importedCount = 0;
+    let duplicateCount = 0;
+    let emptyCount = 0;
+
+    for(const course of COURSES){
+
+      const rawItems =
+        plansByCourse[String(course.id)] || [];
+
+      const items =
+        normalizeTemplateItems(rawItems);
+
+      if(!items.length){
+        emptyCount++;
+        continue;
+      }
+
+      const signature =
+        createTemplateSignature(items);
+
+      if(existingSignatures.has(signature)){
+        duplicateCount++;
+        continue;
+      }
+
+      const maxWeek =
+        Math.max(
+          ...items.map(item=>Number(item.week || 1)),
+          1
+        );
+
+      const courseDuration =
+        getCourseDuration(course);
+
+      const duration =
+        Math.max(
+          maxWeek,
+          Number(courseDuration || 1)
+        );
+
+      await db
+        .collection("StudyPlanTemplates")
+        .add({
+          name:buildImportedTemplateName(course),
+          duration,
+          items,
+          importedFromCourseId:String(course.id),
+          importedFromCourseName:
+            String(course.TrainingCourse || ""),
+          importedAt:
+            firebase.firestore.FieldValue.serverTimestamp(),
+          createdAt:
+            firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+      existingSignatures.add(signature);
+      importedCount++;
+    }
+
+    await loadSavedPlans();
+
+    alert(
+      `✅ اكتمل استيراد الخطط السابقة\n\n` +
+      `الخطط الجديدة المحفوظة: ${importedCount}\n` +
+      `الخطط المتطابقة التي لم تُكرر: ${duplicateCount}\n` +
+      `الدورات التي لا تحتوي خطة: ${emptyCount}`
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "حدث خطأ أثناء استيراد الخطط السابقة"
+    );
+
+  }finally{
+
+    if(button){
+      button.disabled = false;
+      button.innerHTML = oldButtonHtml;
+    }
+  }
+}
+
+async function applySavedPlanToFilteredCourses(){
+  const templateId =
+    document.getElementById("savedPlanSelect").value;
+
+  if(!templateId){
+    alert("اختر خطة محفوظة");
+    return;
+  }
+
+  if(!FILTERED_COURSES.length){
+    alert("لا توجد دورات مفلترة لربط الخطة بها");
+    return;
+  }
+
+  const template =
+    SAVED_PLANS.find(plan=>plan.id === templateId);
+
+  if(!template){
+    alert("الخطة المحفوظة غير موجودة");
+    return;
+  }
+
+  const items =
+    Array.isArray(template.items)
+      ? template.items
+      : [];
+
+  if(!items.length){
+    alert("الخطة المحفوظة فارغة");
+    return;
+  }
+
+  const message =
+    FILTERED_COURSES.length === 1
+      ? `سيتم ربط الخطة بالدورة المحددة. هل تريد المتابعة؟`
+      : `سيتم ربط الخطة بعدد ${FILTERED_COURSES.length} دورة مفلترة. هل تريد المتابعة؟`;
+
+  if(!confirm(message)){
+    return;
+  }
+
+  try{
+    for(const course of FILTERED_COURSES){
+
+      /*
+        حذف الخطة القديمة للدورة أولاً حتى يصبح الربط مطابقاً
+        للخطة المحفوظة، ولا تبقى خلايا قديمة غير موجودة بالقالب.
+      */
+      const oldSnap =
+        await db.collection("StudyPlans")
+          .where("courseId","==",course.id)
+          .get();
+
+      const deleteBatch = db.batch();
+
+      oldSnap.forEach(doc=>{
+        deleteBatch.delete(doc.ref);
+      });
+
+      await deleteBatch.commit();
+
+      const writeBatch = db.batch();
+
+      items.forEach(item=>{
+        const week = Number(item.week || 0);
+        const day = String(item.day || "");
+        const activity = String(item.activity || "").trim();
+
+        if(!week || !day || !activity) return;
+
+        const id =
+          `${course.id}_${week}_${day}`;
+
+        const ref =
+          db.collection("StudyPlans").doc(id);
+
+        writeBatch.set(ref,{
+          courseId:course.id,
+          templateId,
+          templateName:template.name || "",
+          week,
+          day,
+          activity,
+          updatedAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+
+      await writeBatch.commit();
+    }
+
+    for(const course of FILTERED_COURSES){
+      await loadStudyPlan(course.id);
+    }
+
+    alert("✅ تم ربط الخطة المحفوظة بالدورات المفلترة");
+
+  }catch(error){
+    console.error(error);
+    alert("حدث خطأ أثناء ربط الخطة بالدورات");
+  }
+}
+
+</script>
+
+<!-- ================= SAVED PLAN MODAL ================= -->
+
+<div id="savedPlanModal"
+     style="
+       display:none;
+       position:fixed;
+       inset:0;
+       background:rgba(0,0,0,.48);
+       z-index:99999;
+       align-items:center;
+       justify-content:center;
+       padding:12px;
+     ">
+
+  <div style="
+    width:min(1200px,98%);
+    max-height:95vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:20px;
+    padding:22px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+  ">
+
+    <div style="
+      font-size:24px;
+      font-weight:900;
+      color:#164478;
+      margin-bottom:16px;
+      text-align:center;
+    ">
+      إدارة الخطط الدراسية المحفوظة
+    </div>
+
+    <div style="
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:12px;
+    ">
+      <input
+        id="templateName"
+        class="template-field"
+        type="text"
+        placeholder="اسم الخطة، مثال: خطة المستوى الأول"
+      >
+
+      <select id="templateDuration" class="template-field">
+        <option value="1">1 Week</option>
+        <option value="2">2 Weeks</option>
+        <option value="3">3 Weeks</option>
+        <option value="4">4 Weeks</option>
+        <option value="5">5 Weeks</option>
+        <option value="6">6 Weeks</option>
+        <option value="7">7 Weeks</option>
+        <option value="8" selected>8 Weeks</option>
+        <option value="9">9 Weeks</option>
+        <option value="10">10 Weeks</option>
+        <option value="12">12 Weeks</option>
+      </select>
+    </div>
+
+    <div id="templateEditorBox"></div>
+
+    <div class="template-actions">
+      <button
+        class="bulk-save"
+        onclick="saveStudyPlanTemplate()">
+        <i class="fa-solid fa-floppy-disk"></i>
+        حفظ الخطة
+      </button>
+
+      <button
+        id="deleteTemplateBtn"
+        class="bulk-cancel"
+        onclick="deleteSavedPlanTemplate()"
+        style="display:none">
+        <i class="fa-solid fa-trash"></i>
+        حذف الخطة
+      </button>
+
+      <button
+        class="logout-badge"
+        onclick="createNewSavedPlan()">
+        <i class="fa-solid fa-plus"></i>
+        خطة جديدة
+      </button>
+
+      <button
+        class="bulk-cancel"
+        onclick="closeSavedPlanModal()">
+        إغلاق
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  const savedPlanSelect =
+    document.getElementById("savedPlanSelect");
+
+  if(savedPlanSelect){
+    savedPlanSelect.addEventListener("dblclick",function(){
+      if(this.value){
+        editSelectedSavedPlan();
+      }
+    });
+  }
+});
+</script>
