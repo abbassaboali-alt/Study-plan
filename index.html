@@ -446,6 +446,17 @@ textarea{
   font-weight:900;
   font-family:Tajawal,sans-serif;
 }
+.saved-plan-star-btn{
+  background:#f59e0b;
+  color:#fff;
+  min-width:46px;
+  padding:8px 12px;
+}
+.saved-plan-star-btn:hover{ background:#d97706; }
+.saved-plan-star-btn.is-favorite{
+  background:#fbbf24;
+  color:#7c2d12;
+}
 .saved-plan-apply-btn{
   background:#198754;
 }
@@ -554,10 +565,19 @@ textarea.plan-dirty{
 </button>
 
 <button
+  id="favoriteSavedPlanBtn"
+  class="logout-badge saved-plan-star-btn"
+  onclick="toggleSelectedSavedPlanFavorite()"
+  title="تمييز / إلغاء تمييز الخطة المختارة">
+  <i class="fa-regular fa-star"></i>
+  تمييز
+</button>
+
+<button
   class="logout-badge import-old-plans-btn"
-  onclick="importExistingCoursePlansAsTemplates()">
+  onclick="importSelectedCoursePlanAsTemplate()">
   <i class="fa-solid fa-file-import"></i>
-  استيراد الخطط السابقة
+  استيراد خطة الدورة المحددة
 </button>
 
 <button
@@ -1695,12 +1715,14 @@ async function loadSavedPlans(){
         id:doc.id,
         ...doc.data()
       }))
-      .sort((a,b)=>
-        String(a.name || "").localeCompare(
+      .sort((a,b)=>{
+        const favDiff = Number(Boolean(b.favorite)) - Number(Boolean(a.favorite));
+        if(favDiff) return favDiff;
+        return String(a.name || "").localeCompare(
           String(b.name || ""),
           "ar"
-        )
-      );
+        );
+      });
 
     buildSavedPlanDropdown();
 
@@ -1726,13 +1748,60 @@ function buildSavedPlanDropdown(){
 
     option.value = plan.id;
     option.textContent =
-      `${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
+      `${plan.favorite ? "⭐ " : ""}${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
 
     select.appendChild(option);
   });
 
   if(SAVED_PLANS.some(plan=>plan.id === oldValue)){
     select.value = oldValue;
+  }
+
+  updateFavoriteSavedPlanButton();
+}
+
+function updateFavoriteSavedPlanButton(){
+  const select = document.getElementById("savedPlanSelect");
+  const button = document.getElementById("favoriteSavedPlanBtn");
+  if(!button || !select) return;
+
+  const plan = SAVED_PLANS.find(p=>p.id === select.value);
+  const favorite = Boolean(plan?.favorite);
+
+  button.disabled = !plan;
+  button.classList.toggle("is-favorite", favorite);
+  button.innerHTML = favorite
+    ? '<i class="fa-solid fa-star"></i> مميزة'
+    : '<i class="fa-regular fa-star"></i> تمييز';
+}
+
+async function toggleSelectedSavedPlanFavorite(){
+  const select = document.getElementById("savedPlanSelect");
+  const id = select?.value || "";
+
+  if(!id){
+    alert("اختر خطة محفوظة أولاً");
+    return;
+  }
+
+  const plan = SAVED_PLANS.find(p=>p.id === id);
+  if(!plan){
+    alert("الخطة المحفوظة غير موجودة");
+    return;
+  }
+
+  try{
+    await db.collection("StudyPlanTemplates").doc(id).set({
+      favorite: !Boolean(plan.favorite),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    },{merge:true});
+
+    await loadSavedPlans();
+    document.getElementById("savedPlanSelect").value = id;
+    updateFavoriteSavedPlanButton();
+  }catch(error){
+    console.error(error);
+    alert("حدث خطأ أثناء تحديث تمييز الخطة");
   }
 }
 
@@ -2077,26 +2146,26 @@ function buildImportedTemplateName(course){
     : "خطة دراسية مستوردة";
 }
 
-async function importExistingCoursePlansAsTemplates(){
+async function importSelectedCoursePlanAsTemplate(){
 
-  if(!COURSES.length){
-    alert("لا توجد دورات متاحة");
+  if(FILTERED_COURSES.length !== 1){
+    alert(
+      FILTERED_COURSES.length === 0
+        ? "فلتر الدورات حتى تظهر دورة واحدة فقط ثم اضغط استيراد."
+        : `يوجد ${FILTERED_COURSES.length} دورات بعد الفلترة. اختر دورة واحدة فقط لاستيراد خطتها.`
+    );
     return;
   }
+
+  const course = FILTERED_COURSES[0];
 
   const confirmed = confirm(
-    "سيتم تحويل الخطط السابقة الموجودة داخل الدورات إلى خطط محفوظة مستقلة. لن يتم حذف أو تغيير الخطط الحالية في الدورات. هل تريد المتابعة؟"
+    `سيتم استيراد خطة هذه الدورة فقط:\n\n${buildImportedTemplateName(course)}\n\nهل تريد المتابعة؟`
   );
+  if(!confirmed) return;
 
-  if(!confirmed){
-    return;
-  }
-
-  const button =
-    document.querySelector(".import-old-plans-btn");
-
-  const oldButtonHtml =
-    button ? button.innerHTML : "";
+  const button = document.querySelector(".import-old-plans-btn");
+  const oldButtonHtml = button ? button.innerHTML : "";
 
   if(button){
     button.disabled = true;
@@ -2105,131 +2174,76 @@ async function importExistingCoursePlansAsTemplates(){
   }
 
   try{
+    const snap = await db.collection("StudyPlans")
+      .where("courseId","==",String(course.id))
+      .get();
 
-    /*
-      تحميل جميع الخطط السابقة مرة واحدة.
-    */
-    const plansSnap =
-      await db.collection("StudyPlans").get();
-
-    const plansByCourse = {};
-
-    plansSnap.forEach(doc=>{
+    const rawItems = [];
+    snap.forEach(doc=>{
       const data = doc.data() || {};
-      const courseId =
-        String(data.courseId || "").trim();
+      const activity = String(data.activity || "").trim();
+      if(!activity) return;
 
-      const activity =
-        String(data.activity || "").trim();
-
-      if(!courseId || !activity){
-        return;
-      }
-
-      if(!plansByCourse[courseId]){
-        plansByCourse[courseId] = [];
-      }
-
-      plansByCourse[courseId].push({
+      rawItems.push({
         week:Number(data.week || 0),
         day:String(data.day || "").trim(),
         activity
       });
     });
 
-    /*
-      التوقيعات الموجودة تمنع تكرار خطة سبق حفظها.
-    */
-    const existingSignatures = new Set(
-      SAVED_PLANS.map(plan=>
-        createTemplateSignature(
-          Array.isArray(plan.items)
-            ? plan.items
-            : []
-        )
-      )
-    );
+    const items = normalizeTemplateItems(rawItems);
 
-    let importedCount = 0;
-    let duplicateCount = 0;
-    let emptyCount = 0;
-
-    for(const course of COURSES){
-
-      const rawItems =
-        plansByCourse[String(course.id)] || [];
-
-      const items =
-        normalizeTemplateItems(rawItems);
-
-      if(!items.length){
-        emptyCount++;
-        continue;
-      }
-
-      const signature =
-        createTemplateSignature(items);
-
-      if(existingSignatures.has(signature)){
-        duplicateCount++;
-        continue;
-      }
-
-      const maxWeek =
-        Math.max(
-          ...items.map(item=>Number(item.week || 1)),
-          1
-        );
-
-      const courseDuration =
-        getCourseDuration(course);
-
-      const duration =
-        Math.max(
-          maxWeek,
-          Number(courseDuration || 1)
-        );
-
-      await db
-        .collection("StudyPlanTemplates")
-        .add({
-          name:buildImportedTemplateName(course),
-          duration,
-          items,
-          importedFromCourseId:String(course.id),
-          importedFromCourseName:
-            String(course.TrainingCourse || ""),
-          importedAt:
-            firebase.firestore.FieldValue.serverTimestamp(),
-          createdAt:
-            firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-      existingSignatures.add(signature);
-      importedCount++;
+    if(!items.length){
+      alert("هذه الدورة لا تحتوي على خطة دراسية محفوظة.");
+      return;
     }
 
-    await loadSavedPlans();
-
-    alert(
-      `✅ اكتمل استيراد الخطط السابقة\n\n` +
-      `الخطط الجديدة المحفوظة: ${importedCount}\n` +
-      `الخطط المتطابقة التي لم تُكرر: ${duplicateCount}\n` +
-      `الدورات التي لا تحتوي خطة: ${emptyCount}`
+    const signature = createTemplateSignature(items);
+    const duplicate = SAVED_PLANS.find(plan=>
+      createTemplateSignature(
+        Array.isArray(plan.items) ? plan.items : []
+      ) === signature
     );
+
+    if(duplicate){
+      document.getElementById("savedPlanSelect").value = duplicate.id;
+      updateFavoriteSavedPlanButton();
+      alert("هذه الخطة موجودة مسبقاً ضمن الخطط المحفوظة.");
+      return;
+    }
+
+    const maxWeek = Math.max(
+      ...items.map(item=>Number(item.week || 1)),
+      1
+    );
+
+    const duration = Math.max(
+      maxWeek,
+      Number(getCourseDuration(course) || 1)
+    );
+
+    const ref = await db.collection("StudyPlanTemplates").add({
+      name:buildImportedTemplateName(course),
+      duration,
+      items,
+      favorite:false,
+      importedFromCourseId:String(course.id),
+      importedFromCourseName:String(course.TrainingCourse || ""),
+      importedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    await loadSavedPlans();
+    document.getElementById("savedPlanSelect").value = ref.id;
+    updateFavoriteSavedPlanButton();
+
+    alert("✅ تم استيراد خطة الدورة المحددة فقط");
 
   }catch(error){
-
     console.error(error);
-
-    alert(
-      "حدث خطأ أثناء استيراد الخطط السابقة"
-    );
-
+    alert("حدث خطأ أثناء استيراد خطة الدورة المحددة");
   }finally{
-
     if(button){
       button.disabled = false;
       button.innerHTML = oldButtonHtml;
@@ -2445,11 +2459,17 @@ document.addEventListener("DOMContentLoaded",function(){
     document.getElementById("savedPlanSelect");
 
   if(savedPlanSelect){
+    savedPlanSelect.addEventListener("change",function(){
+      updateFavoriteSavedPlanButton();
+    });
+
     savedPlanSelect.addEventListener("dblclick",function(){
       if(this.value){
         editSelectedSavedPlan();
       }
     });
+
+    updateFavoriteSavedPlanButton();
   }
 });
 </script>
