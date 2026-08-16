@@ -509,6 +509,61 @@ textarea{
   background:#fff;
 }
 
+
+/* ================= PDF TABLE SELECTION ================= */
+.pdf-select-actions{
+  display:inline-flex;
+  gap:7px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.pdf-select-btn{
+  background:#64748b;
+}
+
+.pdf-select-btn:hover{
+  background:#475569;
+}
+
+.pdf-course-check-wrap{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-inline-end:10px;
+  padding:5px 9px;
+  border-radius:9px;
+  background:#eef6ff;
+  border:1px solid #b9d5f5;
+  color:#164478;
+  cursor:pointer;
+  user-select:none;
+  vertical-align:middle;
+}
+
+.pdf-course-check{
+  width:18px;
+  height:18px;
+  accent-color:#164478;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+
+.pdf-course-selected{
+  box-shadow:0 0 0 2px rgba(22,68,120,.14);
+}
+
+@media(max-width:768px){
+  .pdf-course-check-wrap{
+    padding:4px 7px;
+    font-size:11px;
+  }
+  .pdf-course-check{
+    width:17px;
+    height:17px;
+  }
+}
+
 .save-all-changes{
   background:#198754;
   color:#fff;
@@ -551,8 +606,26 @@ textarea.plan-dirty{
 
   <button class="logout-badge" onclick="exportPlanPDF()">
     <i class="fa-solid fa-file-pdf"></i>
-    Export PDF
+    Export Selected PDF
   </button>
+
+  <div class="pdf-select-actions">
+    <button
+      class="logout-badge pdf-select-btn"
+      type="button"
+      onclick="setAllPdfCourseSelection(true)">
+      <i class="fa-solid fa-square-check"></i>
+      تحديد الكل
+    </button>
+
+    <button
+      class="logout-badge pdf-select-btn"
+      type="button"
+      onclick="setAllPdfCourseSelection(false)">
+      <i class="fa-regular fa-square"></i>
+      إلغاء التحديد
+    </button>
+  </div>
 <select id="savedPlanSelect" class="saved-plan-select">
   <option value="">اختر خطة محفوظة</option>
 </select>
@@ -1038,7 +1111,17 @@ else{
     const currentWeek = getCurrentWeek(c.StartingDate, duration);
 
     let html = `
-      <div class="note">
+      <div class="note pdf-course-selected" data-pdf-course-header="${escapeHtml(c.id)}">
+        <label class="pdf-course-check-wrap" title="تحديد هذه الخطة للطباعة في PDF">
+          <input
+            type="checkbox"
+            class="pdf-course-check"
+            data-pdf-course="${escapeHtml(c.id)}"
+            checked
+            onchange="updatePdfCourseSelectionStyle(this)">
+          <span>PDF</span>
+        </label>
+
         <b>الدورة:</b> ${escapeHtml(c.TrainingCourse || "-")} |
         <b>المدرب:</b> ${escapeHtml(c.Trainer || "-")} |
         <b>الفترة:</b> ${escapeHtml(c.Period || "-")} |
@@ -1395,6 +1478,51 @@ function cancelBulk(){
 
 }
 
+
+/* ================= PDF COURSE SELECTION ================= */
+
+function updatePdfCourseSelectionStyle(checkbox){
+  if(!checkbox) return;
+
+  const courseId = String(checkbox.dataset.pdfCourse || "");
+  const header = document.querySelector(
+    `[data-pdf-course-header="${CSS.escape(courseId)}"]`
+  );
+
+  if(header){
+    header.classList.toggle(
+      "pdf-course-selected",
+      checkbox.checked
+    );
+  }
+}
+
+function setAllPdfCourseSelection(checked){
+  const boxes = [
+    ...document.querySelectorAll(
+      '#planBox .pdf-course-check[data-pdf-course]'
+    )
+  ];
+
+  if(!boxes.length){
+    alert("لا توجد جداول ظاهرة");
+    return;
+  }
+
+  boxes.forEach(box=>{
+    box.checked = Boolean(checked);
+    updatePdfCourseSelectionStyle(box);
+  });
+}
+
+function getSelectedPdfCourseIds(){
+  return [
+    ...document.querySelectorAll(
+      '#planBox .pdf-course-check[data-pdf-course]:checked'
+    )
+  ].map(box=>String(box.dataset.pdfCourse || ""));
+}
+
 /* ================= PDF ================= */
 async function exportPlanPDF(){
 
@@ -1407,9 +1535,30 @@ async function exportPlanPDF(){
       return;
     }
 
+    const selectedCourseIds =
+      getSelectedPdfCourseIds();
+
+    if(!selectedCourseIds.length){
+      alert("حدد جدولاً واحداً على الأقل للطباعة PDF");
+      return;
+    }
+
+    const selectedIdSet =
+      new Set(selectedCourseIds);
+
+    const coursesForPdf =
+      FILTERED_COURSES.filter(course=>
+        selectedIdSet.has(String(course.id))
+      );
+
+    if(!coursesForPdf.length){
+      alert("لم يتم العثور على الجداول المحددة");
+      return;
+    }
+
     if(statusBox){
       statusBox.style.display = "block";
-      statusBox.textContent = "جاري تجهيز PDF بتصميم مضغوط مع الشعار...";
+      statusBox.textContent = `جاري تجهيز PDF لـ ${coursesForPdf.length} جدول محدد...`;
     }
 
     await new Promise(resolve => setTimeout(resolve, 80));
@@ -1428,7 +1577,7 @@ async function exportPlanPDF(){
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
 
-    const sortedCourses = [...FILTERED_COURSES].sort((a,b)=>
+    const sortedCourses = [...coursesForPdf].sort((a,b)=>
       String(a.TrainingCourse || "").localeCompare(
         String(b.TrainingCourse || ""),
         "en",
