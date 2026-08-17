@@ -2284,37 +2284,127 @@ async function deleteSavedPlanTemplate(){
 
 
 function getCurrentAdminName(){
-  return String(localStorage.getItem("username") || "").trim();
+  /*
+    لا نعتمد على role هنا لأن صفحة الدخول الحالية قد تحفظ اسم المستخدم
+    بدون role، أو تحفظه تحت مفتاح مختلف. هوية القفل تعتمد على اسم الحساب
+    المسجل فعلياً في localStorage.
+  */
+  const keys = [
+    "username",
+    "adminUsername",
+    "loggedInUser",
+    "user"
+  ];
+
+  for(const key of keys){
+    const value = String(localStorage.getItem(key) || "").trim();
+    if(value) return value;
+  }
+
+  return "";
+}
+
+function normalizeAdminValue(value){
+  return String(value ?? "").trim().toLowerCase();
 }
 
 async function verifyCurrentAdminPassword(){
   const username = getCurrentAdminName();
-  const role = String(localStorage.getItem("role") || "").trim().toLowerCase();
-  if(!username || role !== "admin"){
-    alert("هذه العملية متاحة للـ Admin المسجل دخوله فقط");
+
+  if(!username){
+    alert("لم يتم العثور على اسم المستخدم المسجل. سجل الدخول من صفحة الإدارة ثم حاول مرة أخرى.");
     return false;
   }
+
   const password = prompt(`أدخل كلمة مرور Admin:\n${username}`);
   if(password === null) return false;
+
   try{
     let userData = null;
-    const direct = await db.collection("users").doc(username).get();
-    if(direct.exists) userData = direct.data() || {};
-    if(!userData){
-      const q = await db.collection("users").where("username","==",username).limit(1).get();
-      if(!q.empty) userData = q.docs[0].data() || {};
+
+    /* 1) إذا كان Document ID هو اسم المستخدم */
+    try{
+      const direct = await db.collection("users").doc(username).get();
+      if(direct.exists){
+        userData = direct.data() || {};
+      }
+    }catch(e){
+      console.warn("Direct admin lookup failed",e);
     }
+
+    /* 2) دعم اختلاف أسماء الحقول في مجموعة users */
     if(!userData){
-      alert("لم يتم العثور على حساب Admin في users");
+      const snap = await db.collection("users").get();
+      const wanted = normalizeAdminValue(username);
+
+      snap.forEach(doc=>{
+        if(userData) return;
+
+        const data = doc.data() || {};
+        const candidates = [
+          doc.id,
+          data.username,
+          data.Username,
+          data.userName,
+          data.user,
+          data.User,
+          data.name,
+          data.Name
+        ];
+
+        const matched = candidates.some(v =>
+          normalizeAdminValue(v) === wanted
+        );
+
+        if(matched){
+          userData = data;
+        }
+      });
+    }
+
+    if(!userData){
+      alert(`لم يتم العثور على حساب المستخدم ${username} في users`);
       return false;
     }
-    const stored = String(userData.password ?? userData.Password ?? userData.pass ?? "");
-    const storedRole = String(userData.role ?? userData.Role ?? "admin").toLowerCase();
-    if(storedRole !== "admin" || stored !== String(password)){
+
+    const storedPassword = String(
+      userData.password ??
+      userData.Password ??
+      userData.pass ??
+      userData.Pass ??
+      userData.userPassword ??
+      ""
+    );
+
+    if(!storedPassword){
+      alert("حساب Admin موجود، لكن لم يتم العثور على حقل كلمة المرور.");
+      return false;
+    }
+
+    /*
+      إذا كان للحساب role نتحقق منه. إذا لم يكن الحقل موجوداً فلا نرفضه،
+      لأن نظام الدخول في الصفحة الأصلية هو المسؤول عن صلاحية الدخول.
+    */
+    const roleValue = String(
+      userData.role ??
+      userData.Role ??
+      userData.type ??
+      userData.Type ??
+      ""
+    ).trim();
+
+    if(roleValue && normalizeAdminValue(roleValue) !== "admin"){
+      alert("هذا الحساب ليس Admin");
+      return false;
+    }
+
+    if(storedPassword !== String(password)){
       alert("كلمة المرور غير صحيحة");
       return false;
     }
+
     return true;
+
   }catch(e){
     console.error(e);
     alert("تعذر التحقق من حساب Admin");
