@@ -601,6 +601,13 @@ textarea.plan-dirty{
   border-color:#f59e0b !important;
 }
 
+/* ===== SAVED PLAN LOCK / SELECTED ACTIONS ===== */
+.template-lock-info{margin:12px 0;padding:10px 12px;border-radius:10px;background:#eef6ff;border:1px solid #b9d5f5;color:#164478;font-weight:900;text-align:center}
+.template-lock-info.is-locked{background:#fff3cd;border-color:#f59e0b;color:#92400e}
+.template-lock-btn{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif}
+.template-pdf-btn{background:#dc3545;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif}
+.templateActivity:disabled,#templateName:disabled,#templateDuration:disabled{opacity:.72;cursor:not-allowed;background:#f1f5f9 !important}
+
 </style>
 <div class="top-buttons">
 
@@ -763,6 +770,7 @@ let BULK_TARGET = null;
 let LATEST_5 = [];
 let SAVED_PLANS = [];
 let ACTIVE_TEMPLATE_ID = null;
+let ACTIVE_TEMPLATE_LOCK = null;
 
 /* ================= HELPERS ================= */
 function escapeHtml(str){
@@ -1253,11 +1261,18 @@ async function saveAllChanges(){
   const status =
     document.getElementById("saveAllStatus");
 
+  const selectedIds = new Set(getSelectedPdfCourseIds());
+
+  if(!selectedIds.size){
+    alert("حدد جدولاً واحداً على الأقل من مربع PDF/التحديد أعلى الجدول");
+    return;
+  }
+
   const textareas = [
     ...document.querySelectorAll(
       '#planBox textarea[data-course][data-week][data-day]'
     )
-  ];
+  ].filter(textarea => selectedIds.has(String(textarea.dataset.course || "")));
 
   if(!textareas.length){
     alert("لا توجد خطط ظاهرة للحفظ");
@@ -1897,7 +1912,7 @@ function buildSavedPlanDropdown(){
 
     option.value = plan.id;
     option.textContent =
-      `${plan.favorite ? "⭐ " : ""}${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
+      `${plan.favorite ? "⭐ " : ""}${plan.locked ? "🔒 " : ""}${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
 
     select.appendChild(option);
   });
@@ -2007,6 +2022,9 @@ function openSavedPlanModal(planId = ""){
     selectedPlan?.items || []
   );
 
+  ACTIVE_TEMPLATE_LOCK = selectedPlan || null;
+  updateTemplateLockUI(selectedPlan);
+
   durationSelect.onchange = function(){
     const currentItems =
       collectTemplateItems(false);
@@ -2029,6 +2047,7 @@ function closeSavedPlanModal(){
   }
 
   ACTIVE_TEMPLATE_ID = null;
+  ACTIVE_TEMPLATE_LOCK = null;
 }
 
 function createNewSavedPlan(){
@@ -2149,6 +2168,12 @@ function collectTemplateItems(skipEmpty = true){
 }
 
 async function saveStudyPlanTemplate(){
+  const currentPlan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
+  if(currentPlan?.locked){
+    alert(`🔒 هذه الخطة مقفلة بواسطة ${currentPlan.lockedByName || currentPlan.lockedBy || "Admin"}. افتح القفل أولاً.`);
+    return;
+  }
+
   const name =
     String(
       document.getElementById("templateName").value || ""
@@ -2227,6 +2252,12 @@ async function deleteSavedPlanTemplate(){
     return;
   }
 
+  const currentPlan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
+  if(currentPlan?.locked){
+    alert(`🔒 لا يمكن حذف الخطة وهي مقفلة بواسطة ${currentPlan.lockedByName || currentPlan.lockedBy || "Admin"}.`);
+    return;
+  }
+
   if(!confirm("هل تريد حذف الخطة المحفوظة؟")){
     return;
   }
@@ -2251,6 +2282,132 @@ async function deleteSavedPlanTemplate(){
   }
 }
 
+
+function getCurrentAdminName(){
+  return String(localStorage.getItem("username") || "").trim();
+}
+
+async function verifyCurrentAdminPassword(){
+  const username = getCurrentAdminName();
+  const role = String(localStorage.getItem("role") || "").trim().toLowerCase();
+  if(!username || role !== "admin"){
+    alert("هذه العملية متاحة للـ Admin المسجل دخوله فقط");
+    return false;
+  }
+  const password = prompt(`أدخل كلمة مرور Admin:\n${username}`);
+  if(password === null) return false;
+  try{
+    let userData = null;
+    const direct = await db.collection("users").doc(username).get();
+    if(direct.exists) userData = direct.data() || {};
+    if(!userData){
+      const q = await db.collection("users").where("username","==",username).limit(1).get();
+      if(!q.empty) userData = q.docs[0].data() || {};
+    }
+    if(!userData){
+      alert("لم يتم العثور على حساب Admin في users");
+      return false;
+    }
+    const stored = String(userData.password ?? userData.Password ?? userData.pass ?? "");
+    const storedRole = String(userData.role ?? userData.Role ?? "admin").toLowerCase();
+    if(storedRole !== "admin" || stored !== String(password)){
+      alert("كلمة المرور غير صحيحة");
+      return false;
+    }
+    return true;
+  }catch(e){
+    console.error(e);
+    alert("تعذر التحقق من حساب Admin");
+    return false;
+  }
+}
+
+function updateTemplateLockUI(plan){
+  const info = document.getElementById("templateLockInfo");
+  const lockBtn = document.getElementById("templateLockBtn");
+  const saveBtn = document.getElementById("saveTemplateBtn");
+  const deleteBtn = document.getElementById("deleteTemplateBtn");
+  const locked = Boolean(plan?.locked);
+  const owner = String(plan?.lockedByName || plan?.lockedBy || "");
+  if(info){
+    info.classList.toggle("is-locked", locked);
+    info.innerHTML = locked
+      ? `🔒 الخطة مقفلة — Locked by: <b>${escapeHtml(owner || "Admin")}</b>`
+      : "🔓 الخطة غير مقفلة";
+  }
+  if(lockBtn){
+    lockBtn.style.display = plan ? "inline-flex" : "none";
+    lockBtn.innerHTML = locked
+      ? '<i class="fa-solid fa-lock-open"></i> فتح القفل'
+      : '<i class="fa-solid fa-lock"></i> قفل الخطة';
+  }
+  document.querySelectorAll("#templateEditorBox .templateActivity").forEach(el=>el.disabled=locked);
+  const name = document.getElementById("templateName");
+  const duration = document.getElementById("templateDuration");
+  if(name) name.disabled = locked;
+  if(duration) duration.disabled = locked;
+  if(saveBtn) saveBtn.disabled = locked;
+  if(deleteBtn) deleteBtn.disabled = locked;
+}
+
+async function toggleActiveTemplateLock(){
+  if(!ACTIVE_TEMPLATE_ID){ alert("اختر خطة محفوظة أولاً"); return; }
+  const plan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
+  if(!plan){ alert("الخطة غير موجودة"); return; }
+  const currentAdmin = getCurrentAdminName();
+  if(plan.locked && String(plan.lockedBy || "") !== currentAdmin){
+    alert(`🔒 لا يستطيع فتح هذه الخطة إلا Admin الذي قفلها: ${plan.lockedByName || plan.lockedBy || "Admin"}`);
+    return;
+  }
+  const ok = await verifyCurrentAdminPassword();
+  if(!ok) return;
+  try{
+    const ref = db.collection("StudyPlanTemplates").doc(ACTIVE_TEMPLATE_ID);
+    if(plan.locked){
+      await ref.set({locked:false,lockedBy:"",lockedByName:"",unlockedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    }else{
+      await ref.set({locked:true,lockedBy:currentAdmin,lockedByName:currentAdmin,lockedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    }
+    const keepId = ACTIVE_TEMPLATE_ID;
+    await loadSavedPlans();
+    ACTIVE_TEMPLATE_ID = keepId;
+    const fresh = SAVED_PLANS.find(p=>p.id === keepId) || null;
+    ACTIVE_TEMPLATE_LOCK = fresh;
+    updateTemplateLockUI(fresh);
+    document.getElementById("savedPlanSelect").value = keepId;
+  }catch(e){
+    console.error(e); alert("حدث خطأ أثناء تحديث قفل الخطة");
+  }
+}
+
+async function exportActiveTemplatePDF(){
+  if(!ACTIVE_TEMPLATE_ID){ alert("اختر خطة محفوظة أولاً"); return; }
+  const plan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
+  if(!plan){ alert("الخطة غير موجودة"); return; }
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
+  const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
+  const BLUE=[22,68,120];
+  let logoData=null; try{logoData=await urlToDataURL(LOGO_URL);}catch(e){}
+  doc.setFillColor(...BLUE); doc.rect(0,0,W,24,"F");
+  if(logoData){doc.setFillColor(255,255,255);doc.roundedRect(8,3,18,17,2,2,"F");doc.addImage(logoData,"PNG",10,5,14,13);}
+  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(17);doc.text("PRUDLE STUDY PLAN",W/2,10,{align:"center"});
+  doc.setFontSize(10);doc.text(String(plan.name||"Saved Study Plan"),W/2,18,{align:"center"});
+  const daysAR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
+  const daysEN=["Sunday","Monday","Tuesday","Wednesday","Thursday"];
+  const map={}; (plan.items||[]).forEach(i=>map[`${Number(i.week)}_${String(i.day||"")}`]=String(i.activity||""));
+  const body=[]; const duration=Number(plan.duration||1);
+  for(let w=1;w<=duration;w++){const row=[`Week ${w}`];daysAR.forEach(d=>row.push(map[`${w}_${d}`]||""));body.push(row);}
+  const usable=W-12, weekW=18, dayW=(usable-weekW)/5;
+  doc.autoTable({startY:31,head:[["Week",...daysEN]],body,theme:"grid",margin:{left:6,right:6,bottom:15},tableWidth:usable,
+    headStyles:{fillColor:BLUE,textColor:[255,255,255],fontStyle:"bold",halign:"center",fontSize:8},
+    styles:{font:"helvetica",fontSize:7,cellPadding:1.8,halign:"center",valign:"middle",overflow:"linebreak"},
+    columnStyles:{0:{cellWidth:weekW,fontStyle:"bold"},1:{cellWidth:dayW},2:{cellWidth:dayW},3:{cellWidth:dayW},4:{cellWidth:dayW},5:{cellWidth:dayW}},
+    didParseCell(data){if(data.section!=="body"||data.column.index===0)return;const t=String(data.cell.raw||"").toLowerCase();if(t.includes("final")){data.cell.styles.fillColor=[220,53,69];data.cell.styles.textColor=[255,255,255];data.cell.styles.fontStyle="bold";}else if(t.includes("midterm")){data.cell.styles.fillColor=[255,193,7];data.cell.styles.fontStyle="bold";}else if(t.includes("quiz")){data.cell.styles.fillColor=[13,110,253];data.cell.styles.textColor=[255,255,255];data.cell.styles.fontStyle="bold";}else if(t.includes("activity")||t.includes("listening")||t.includes("speaking")||t.includes("writing")||t.includes("grammar")||t.includes("vocabulary")){data.cell.styles.fillColor=[25,135,84];data.cell.styles.textColor=[255,255,255];data.cell.styles.fontStyle="bold";}else if(t){data.cell.styles.fillColor=[255,250,225];}}
+  });
+  doc.setFontSize(7);doc.setTextColor(110);doc.text(`Locked by: ${plan.lockedByName||plan.lockedBy||"-"}`,6,H-6);doc.text("Prudle Institute - Study Plan",W-6,H-6,{align:"right"});
+  const safe=String(plan.name||"Study_Plan").replace(/[^a-zA-Z0-9_-]+/g,"_");doc.save(`${safe}.pdf`);
+}
 
 function normalizeTemplateItems(items){
   return [...items]
@@ -2568,12 +2725,24 @@ async function applySavedPlanToFilteredCourses(){
 
     <div id="templateEditorBox"></div>
 
+    <div id="templateLockInfo" class="template-lock-info">🔓 الخطة غير مقفلة</div>
+
     <div class="template-actions">
       <button
+        id="saveTemplateBtn"
         class="bulk-save"
         onclick="saveStudyPlanTemplate()">
         <i class="fa-solid fa-floppy-disk"></i>
         حفظ الخطة
+      </button>
+
+
+      <button id="templatePdfBtn" class="template-pdf-btn" onclick="exportActiveTemplatePDF()">
+        <i class="fa-solid fa-file-pdf"></i> PDF الخطة المحددة
+      </button>
+
+      <button id="templateLockBtn" class="template-lock-btn" onclick="toggleActiveTemplateLock()" style="display:none">
+        <i class="fa-solid fa-lock"></i> قفل الخطة
       </button>
 
       <button
