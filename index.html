@@ -2283,132 +2283,82 @@ async function deleteSavedPlanTemplate(){
 }
 
 
-function getCurrentAdminName(){
-  /*
-    لا نعتمد على role هنا لأن صفحة الدخول الحالية قد تحفظ اسم المستخدم
-    بدون role، أو تحفظه تحت مفتاح مختلف. هوية القفل تعتمد على اسم الحساب
-    المسجل فعلياً في localStorage.
-  */
-  const keys = [
-    "username",
-    "adminUsername",
-    "loggedInUser",
-    "user"
-  ];
-
-  for(const key of keys){
-    const value = String(localStorage.getItem(key) || "").trim();
-    if(value) return value;
-  }
-
-  return "";
-}
-
 function normalizeAdminValue(value){
-  return String(value ?? "").trim().toLowerCase();
+  return String(value || "").trim().toLowerCase();
 }
 
+/* نفس التحقق المستخدم في كود الاختبارات: حساب Admin الحالي + USERS */
 async function verifyCurrentAdminPassword(){
-  const username = getCurrentAdminName();
+  const currentRole = normalizeAdminValue(localStorage.getItem("role"));
+  const currentUsername = String(localStorage.getItem("username") || "").trim();
 
-  if(!username){
-    alert("لم يتم العثور على اسم المستخدم المسجل. سجل الدخول من صفحة الإدارة ثم حاول مرة أخرى.");
-    return false;
+  if(currentRole !== "admin"){
+    alert("❌ لا يمكن تنفيذ القفل إلا بواسطة Admin");
+    return null;
+  }
+  if(!currentUsername){
+    alert("❌ لم يتم العثور على اسم Admin المسجل. سجل الدخول مرة أخرى.");
+    return null;
   }
 
-  const password = prompt(`أدخل كلمة مرور Admin:\n${username}`);
-  if(password === null) return false;
+  const enteredUsername = prompt("اسم مستخدم Admin", currentUsername);
+  if(enteredUsername === null) return null;
+
+  const normalizedCurrent = normalizeAdminValue(currentUsername);
+  const normalizedEntered = normalizeAdminValue(enteredUsername);
+  if(!normalizedEntered || normalizedEntered !== normalizedCurrent){
+    alert("❌ يجب استخدام نفس حساب Admin المسجل حاليًا.");
+    return null;
+  }
+
+  const enteredPassword = prompt("كلمة مرور Admin");
+  if(enteredPassword === null) return null;
 
   try{
-    let userData = null;
+    let userSnap = await db.collection("USERS")
+      .where("usernameLower", "==", normalizedCurrent)
+      .limit(1)
+      .get();
 
-    /* 1) إذا كان Document ID هو اسم المستخدم */
-    try{
-      const direct = await db.collection("users").doc(username).get();
-      if(direct.exists){
-        userData = direct.data() || {};
-      }
-    }catch(e){
-      console.warn("Direct admin lookup failed",e);
-    }
-
-    /* 2) دعم اختلاف أسماء الحقول في مجموعة users */
-    if(!userData){
-      const snap = await db.collection("users").get();
-      const wanted = normalizeAdminValue(username);
-
-      snap.forEach(doc=>{
-        if(userData) return;
-
-        const data = doc.data() || {};
-        const candidates = [
-          doc.id,
-          data.username,
-          data.Username,
-          data.userName,
-          data.user,
-          data.User,
-          data.name,
-          data.Name
-        ];
-
-        const matched = candidates.some(v =>
-          normalizeAdminValue(v) === wanted
-        );
-
-        if(matched){
-          userData = data;
-        }
+    /* دعم حسابات USERS القديمة التي لا تحتوي usernameLower */
+    if(userSnap.empty){
+      const allUsers = await db.collection("USERS").get();
+      const matchingDoc = allUsers.docs.find(doc=>{
+        const user = doc.data() || {};
+        return normalizeAdminValue(user.username) === normalizedCurrent;
       });
+      if(matchingDoc){
+        userSnap = {empty:false, docs:[matchingDoc]};
+      }
     }
 
-    if(!userData){
-      alert(`لم يتم العثور على حساب المستخدم ${username} في users`);
-      return false;
+    if(userSnap.empty){
+      alert("❌ لم يتم العثور على حساب Admin في USERS.");
+      return null;
     }
 
-    const storedPassword = String(
-      userData.password ??
-      userData.Password ??
-      userData.pass ??
-      userData.Pass ??
-      userData.userPassword ??
-      ""
-    );
-
-    if(!storedPassword){
-      alert("حساب Admin موجود، لكن لم يتم العثور على حقل كلمة المرور.");
-      return false;
+    const userDoc = userSnap.docs[0];
+    const user = userDoc.data() || {};
+    if(normalizeAdminValue(user.role) !== "admin"){
+      alert("❌ هذا الحساب ليس Admin.");
+      return null;
+    }
+    if(String(user.password || "") !== String(enteredPassword)){
+      alert("❌ كلمة مرور Admin غير صحيحة");
+      return null;
     }
 
-    /*
-      إذا كان للحساب role نتحقق منه. إذا لم يكن الحقل موجوداً فلا نرفضه،
-      لأن نظام الدخول في الصفحة الأصلية هو المسؤول عن صلاحية الدخول.
-    */
-    const roleValue = String(
-      userData.role ??
-      userData.Role ??
-      userData.type ??
-      userData.Type ??
-      ""
-    ).trim();
-
-    if(roleValue && normalizeAdminValue(roleValue) !== "admin"){
-      alert("هذا الحساب ليس Admin");
-      return false;
-    }
-
-    if(storedPassword !== String(password)){
-      alert("كلمة المرور غير صحيحة");
-      return false;
-    }
-
-    return true;
-
-  }catch(e){
-    console.error(e);
-    alert("تعذر التحقق من حساب Admin");
-    return false;
+    return {
+      id:userDoc.id,
+      username:String(user.username || currentUsername).trim(),
+      usernameNormalized:normalizeAdminValue(user.username || currentUsername),
+      fullName:String(user.fullName || "").trim(),
+      displayName:String(user.fullName || user.username || currentUsername).trim()
+    };
+  }catch(error){
+    console.error("ADMIN STUDY PLAN LOCK VERIFICATION ERROR:", error);
+    alert("❌ تعذر التحقق من حساب Admin\n" + (error?.message || String(error)));
+    return null;
   }
 }
 
@@ -2444,19 +2394,51 @@ async function toggleActiveTemplateLock(){
   if(!ACTIVE_TEMPLATE_ID){ alert("اختر خطة محفوظة أولاً"); return; }
   const plan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
   if(!plan){ alert("الخطة غير موجودة"); return; }
-  const currentAdmin = getCurrentAdminName();
-  if(plan.locked && String(plan.lockedBy || "") !== currentAdmin){
-    alert(`🔒 لا يستطيع فتح هذه الخطة إلا Admin الذي قفلها: ${plan.lockedByName || plan.lockedBy || "Admin"}`);
-    return;
+  const admin = await verifyCurrentAdminPassword();
+  if(!admin) return;
+
+  if(plan.locked){
+    const lockOwner = normalizeAdminValue(
+      plan.lockedByUsername || plan.lockedByNormalized || plan.lockedBy || ""
+    );
+    /* الخطط القديمة التي لا تحتوي مالكًا يمكن للـ Admin الحالي فتحها */
+    if(lockOwner && lockOwner !== admin.usernameNormalized){
+      alert(
+        "❌ لا يمكنك فتح هذه الخطة.\n\n" +
+        "🔒 تم القفل بواسطة: " + (plan.lockedByName || plan.lockedBy || "Admin") + "\n" +
+        "👤 Admin الحالي: " + admin.displayName
+      );
+      return;
+    }
   }
-  const ok = await verifyCurrentAdminPassword();
-  if(!ok) return;
+
   try{
     const ref = db.collection("StudyPlanTemplates").doc(ACTIVE_TEMPLATE_ID);
     if(plan.locked){
-      await ref.set({locked:false,lockedBy:"",lockedByName:"",unlockedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      await ref.set({
+        locked:false,
+        unlockedBy:admin.displayName,
+        unlockedByUsername:admin.username,
+        unlockedAt:firebase.firestore.FieldValue.serverTimestamp(),
+        lastLockOwner:plan.lockedByName || plan.lockedBy || admin.displayName,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+      alert("✅ تم فتح قفل الخطة\nAdmin: " + admin.displayName);
     }else{
-      await ref.set({locked:true,lockedBy:currentAdmin,lockedByName:currentAdmin,lockedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      await ref.set({
+        locked:true,
+        lockedBy:admin.displayName,
+        lockedByName:admin.displayName,
+        lockedByUsername:admin.username,
+        lockedByNormalized:admin.usernameNormalized,
+        lockedByUserId:admin.id,
+        lockedAt:firebase.firestore.FieldValue.serverTimestamp(),
+        unlockedBy:"",
+        unlockedByUsername:"",
+        unlockedAt:null,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+      alert("🔒 تم قفل الخطة\nAdmin: " + admin.displayName);
     }
     const keepId = ACTIVE_TEMPLATE_ID;
     await loadSavedPlans();
