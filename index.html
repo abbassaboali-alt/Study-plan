@@ -2004,6 +2004,13 @@ function openSavedPlanModal(planId = ""){
     }
   }
 
+  if(selectedPlan?.locked && !canCurrentAdminOpenLockedPlan(selectedPlan)){
+    alertLockedPlanOwner(selectedPlan);
+    ACTIVE_TEMPLATE_ID = null;
+    updateTemplateLockUI(null);
+    return;
+  }
+
   nameInput.value =
     selectedPlan?.name || "";
 
@@ -2287,6 +2294,42 @@ function normalizeAdminValue(value){
   return String(value || "").trim().toLowerCase();
 }
 
+function getCurrentAdminNormalized(){
+  return normalizeAdminValue(localStorage.getItem("username"));
+}
+
+function getPlanLockOwner(plan){
+  return normalizeAdminValue(
+    plan?.lockedByUsername ||
+    plan?.lockedByNormalized ||
+    plan?.lockedBy ||
+    ""
+  );
+}
+
+function canCurrentAdminOpenLockedPlan(plan){
+  if(!plan?.locked) return true;
+
+  const currentAdmin =
+    getCurrentAdminNormalized();
+
+  const lockOwner =
+    getPlanLockOwner(plan);
+
+  /*
+    الخطط القديمة التي لا تحتوي مالكًا واضحًا تبقى قابلة للفتح
+    بواسطة Admin حتى لا تضيع على الإدارة.
+  */
+  return !lockOwner || lockOwner === currentAdmin;
+}
+
+function alertLockedPlanOwner(plan){
+  alert(
+    "🔒 هذه الخطة مقفلة ولا يمكن فتحها إلا بنفس المستخدم الذي قام بالقفل.\n\n" +
+    "تم القفل بواسطة: " + (plan?.lockedByName || plan?.lockedBy || "Admin")
+  );
+}
+
 /* نفس التحقق المستخدم في كود الاختبارات: حساب Admin الحالي + USERS */
 async function verifyCurrentAdminPassword(){
   const currentRole = normalizeAdminValue(localStorage.getItem("role"));
@@ -2398,9 +2441,7 @@ async function toggleActiveTemplateLock(){
   if(!admin) return;
 
   if(plan.locked){
-    const lockOwner = normalizeAdminValue(
-      plan.lockedByUsername || plan.lockedByNormalized || plan.lockedBy || ""
-    );
+    const lockOwner = getPlanLockOwner(plan);
     /* الخطط القديمة التي لا تحتوي مالكًا يمكن للـ Admin الحالي فتحها */
     if(lockOwner && lockOwner !== admin.usernameNormalized){
       alert(
@@ -2648,6 +2689,11 @@ async function applySavedPlanToFilteredCourses(){
 
   if(!template){
     alert("الخطة المحفوظة غير موجودة");
+    return;
+  }
+
+  if(template.locked && !canCurrentAdminOpenLockedPlan(template)){
+    alertLockedPlanOwner(template);
     return;
   }
 
