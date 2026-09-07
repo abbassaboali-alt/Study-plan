@@ -44,7 +44,7 @@ body{
 }
 
 /* 5) تقليل هوامش عناصر واجهتك (بدون ما تخرب التصميم) */
-.logout-badge,
+.top-action-btn,
 .header,
 .actions,
 .stats,
@@ -78,7 +78,7 @@ img, video, canvas{
 }
 </style>
 
-<!-- ================= LOGOUT + PDF + PAGE ================= -->
+<!-- ================= PDF + PAGE ACTIONS ================= -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet" />
 
@@ -127,7 +127,7 @@ table,div,section{max-width:100%}
   max-width:1400px;
   padding:0 16px;
 }
-.logout-badge{
+.top-action-btn{
   background:#164478;
   color:#fff;
   padding:7px 20px;
@@ -143,7 +143,7 @@ table,div,section{max-width:100%}
   transition:.25s;
   font-family:Tajawal,sans-serif;
 }
-.logout-badge:hover{
+.top-action-btn:hover{
   background:#1e5799;
   transform:translateY(-2px);
 }
@@ -313,7 +313,7 @@ body{
   padding:10px 14px !important;
   box-shadow:0 10px 28px rgba(22,68,120,.10);
 }
-.logout-badge{
+.top-action-btn{
   min-height:38px;
   padding:8px 18px;
   border:1px solid rgba(255,255,255,.22);
@@ -601,24 +601,20 @@ textarea.plan-dirty{
   border-color:#f59e0b !important;
 }
 
-/* ===== SAVED PLAN LOCK / SELECTED ACTIONS ===== */
-.template-lock-info{margin:12px 0;padding:10px 12px;border-radius:10px;background:#eef6ff;border:1px solid #b9d5f5;color:#164478;font-weight:900;text-align:center}
-.template-lock-info.is-locked{background:#fff3cd;border-color:#f59e0b;color:#92400e}
-.template-lock-btn{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif}
+/* ===== SAVED PLAN SELECTED ACTIONS ===== */
 .template-pdf-btn{background:#dc3545;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif}
-.templateActivity:disabled,#templateName:disabled,#templateDuration:disabled{opacity:.72;cursor:not-allowed;background:#f1f5f9 !important}
 
 </style>
 <div class="top-buttons">
 
-  <button class="logout-badge" onclick="exportPlanPDF()">
+  <button class="top-action-btn" onclick="exportPlanPDF()">
     <i class="fa-solid fa-file-pdf"></i>
     Export Selected PDF
   </button>
 
   <div class="pdf-select-actions">
     <button
-      class="logout-badge pdf-select-btn"
+      class="top-action-btn pdf-select-btn"
       type="button"
       onclick="setAllPdfCourseSelection(true)">
       <i class="fa-solid fa-square-check"></i>
@@ -626,7 +622,7 @@ textarea.plan-dirty{
     </button>
 
     <button
-      class="logout-badge pdf-select-btn"
+      class="top-action-btn pdf-select-btn"
       type="button"
       onclick="setAllPdfCourseSelection(false)">
       <i class="fa-regular fa-square"></i>
@@ -638,7 +634,7 @@ textarea.plan-dirty{
 </select>
 
 <button
-  class="logout-badge"
+  class="top-action-btn"
   onclick="openSavedPlanModal()">
   <i class="fa-solid fa-folder-plus"></i>
   إدارة الخطط المحفوظة
@@ -646,7 +642,7 @@ textarea.plan-dirty{
 
 <button
   id="favoriteSavedPlanBtn"
-  class="logout-badge saved-plan-star-btn"
+  class="top-action-btn saved-plan-star-btn"
   onclick="toggleSelectedSavedPlanFavorite()"
   title="تمييز / إلغاء تمييز الخطة المختارة">
   <i class="fa-regular fa-star"></i>
@@ -654,14 +650,14 @@ textarea.plan-dirty{
 </button>
 
 <button
-  class="logout-badge import-old-plans-btn"
+  class="top-action-btn import-old-plans-btn"
   onclick="importSelectedCoursePlanAsTemplate()">
   <i class="fa-solid fa-file-import"></i>
   استيراد خطة الدورة المحددة
 </button>
 
 <button
-  class="logout-badge saved-plan-apply-btn"
+  class="top-action-btn saved-plan-apply-btn"
   onclick="applySavedPlanToFilteredCourses()">
   <i class="fa-solid fa-link"></i>
   ربط الخطة بالدورات المفلترة
@@ -1538,6 +1534,157 @@ function getSelectedPdfCourseIds(){
   ].map(box=>String(box.dataset.pdfCourse || ""));
 }
 
+/* ================= PDF PROFESSIONAL DESIGN ================= */
+function drawProfessionalPdfHeader(doc, options = {}){
+  const W = doc.internal.pageSize.getWidth();
+  const title = String(options.title || "PRUDLE STUDY PLAN");
+  const subtitle = String(options.subtitle || "");
+  const meta = Array.isArray(options.meta) ? options.meta.filter(Boolean) : [];
+  const logoData = options.logoData || null;
+  const BLUE = [22,68,120];
+  const BLUE_DARK = [10,38,68];
+  const LIGHT = [245,248,252];
+
+  doc.setFillColor(...BLUE_DARK);
+  doc.rect(0,0,W,12,"F");
+
+  doc.setFillColor(...BLUE);
+  doc.roundedRect(6,8,W-12,25,3,3,"F");
+
+  if(logoData){
+    doc.setFillColor(255,255,255);
+    doc.roundedRect(10,13,18,15,2.5,2.5,"F");
+    doc.addImage(logoData,"PNG",12,15,14,11);
+  }else{
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(9);
+    doc.text("PRUDLE", 12, 22);
+  }
+
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(17);
+  doc.text(title, W/2, 18, {align:"center"});
+
+  doc.setFontSize(9.5);
+  doc.setFont("helvetica","normal");
+  doc.text(subtitle, W/2, 26, {align:"center"});
+
+  let x = 8;
+  let y = 40;
+
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(20,30,45);
+
+  meta.forEach(txt=>{
+    const clean = String(txt || "-").slice(0,58);
+    const chipW = Math.min(Math.max(doc.getTextWidth(clean) + 8, 36), 86);
+    if(x + chipW > W - 8){
+      x = 8;
+      y += 7;
+    }
+    doc.setFillColor(...LIGHT);
+    doc.setDrawColor(210,220,235);
+    doc.roundedRect(x, y-4.8, chipW, 6.3, 1.8, 1.8, "FD");
+    doc.text(clean, x+3.5, y);
+    x += chipW + 3;
+  });
+
+  return Math.max(48, y + 6);
+}
+
+function applyProfessionalPdfCellStyle(data){
+  if(data.section !== "body" || data.column.index === 0) return;
+
+  const txt = String(data.cell.raw || "").trim().toLowerCase();
+
+  if(!txt){
+    data.cell.styles.fillColor = [250,252,255];
+    data.cell.styles.textColor = [150,160,175];
+    return;
+  }
+
+  if(txt.includes("final exam") || txt.includes("final")){
+    data.cell.styles.fillColor = [220,53,69];
+    data.cell.styles.textColor = [255,255,255];
+    data.cell.styles.fontStyle = "bold";
+  }
+  else if(txt.includes("midterm exam") || txt.includes("midterm")){
+    data.cell.styles.fillColor = [255,193,7];
+    data.cell.styles.textColor = [35,35,35];
+    data.cell.styles.fontStyle = "bold";
+  }
+  else if(txt.includes("quiz")){
+    data.cell.styles.fillColor = [13,110,253];
+    data.cell.styles.textColor = [255,255,255];
+    data.cell.styles.fontStyle = "bold";
+  }
+  else if(
+    txt.includes("activity") ||
+    txt.includes("reading") ||
+    txt.includes("listening") ||
+    txt.includes("speaking") ||
+    txt.includes("writing") ||
+    txt.includes("vocabulary") ||
+    txt.includes("grammar")
+  ){
+    data.cell.styles.fillColor = [25,135,84];
+    data.cell.styles.textColor = [255,255,255];
+    data.cell.styles.fontStyle = "bold";
+  }
+  else{
+    data.cell.styles.fillColor = [255,251,235];
+    data.cell.styles.textColor = [28,42,60];
+  }
+}
+
+function drawProfessionalPdfFooter(doc, label = "Prudle Institute - Study Plan"){
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const page = doc.internal.getCurrentPageInfo().pageNumber;
+
+  doc.setDrawColor(220,228,238);
+  doc.line(8,H-12,W-8,H-12);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(7);
+  doc.setTextColor(95,110,130);
+  doc.text(label, 8, H-6);
+  doc.text(`Page ${page}`, W-8, H-6, {align:"right"});
+}
+
+function drawProfessionalPdfGuide(doc, y){
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+
+  if(y > H - 22) return;
+
+  const guide = [
+    {c:[220,53,69], t:"Final"},
+    {c:[255,193,7], t:"Midterm"},
+    {c:[13,110,253], t:"Quiz"},
+    {c:[25,135,84], t:"Activity / Skills"}
+  ];
+
+  doc.setFillColor(248,250,252);
+  doc.setDrawColor(220,228,238);
+  doc.roundedRect(8,y-5,W-16,10,2,2,"FD");
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(7.2);
+  doc.setTextColor(30,41,59);
+  doc.text("Color Guide", 12, y+1);
+
+  let x = 42;
+  guide.forEach(g=>{
+    doc.setFillColor(...g.c);
+    doc.roundedRect(x,y-2.8,4.5,4.5,1,1,"F");
+    doc.setTextColor(30,41,59);
+    doc.text(g.t, x+6.5, y+1);
+    x += doc.getTextWidth(g.t) + 20;
+  });
+}
+
 /* ================= PDF ================= */
 async function exportPlanPDF(){
 
@@ -1648,35 +1795,11 @@ async function exportPlanPDF(){
       const duration =
   getCourseDuration(course);
 
-      // ===== Header compact with logo =====
-      doc.setFillColor(...BLUE);
-      doc.rect(0,0,W,22,"F");
-
-      if(logoData){
-        doc.setFillColor(255,255,255);
-        doc.roundedRect(8,3,17,16,2,2,"F");
-        doc.addImage(logoData,"PNG",10,4.5,13,13);
-      }else{
-        doc.setTextColor(255,255,255);
-        doc.setFont("helvetica","bold");
-        doc.setFontSize(9);
-        doc.text("PRUDLE", 10, 13);
-      }
-
-      doc.setTextColor(255,255,255);
-      doc.setFont("helvetica","bold");
-      doc.setFontSize(17);
-      doc.text("PRUDLE STUDY PLAN", W/2, 9, {align:"center"});
-
-      doc.setFontSize(10);
-      doc.text(String(course.TrainingCourse || "-"), W/2, 17, {align:"center"});
-
-      // ===== Course details in compact chips =====
-      doc.setTextColor(20,30,45);
-      doc.setFontSize(8);
-      doc.setFont("helvetica","bold");
-
-      const details = [
+      const tableStartY = drawProfessionalPdfHeader(doc, {
+        logoData,
+        title:"PRUDLE STUDY PLAN",
+        subtitle:String(course.TrainingCourse || "-"),
+        meta:[
         `Course: ${course.TrainingCourse || "-"}`,
         `Trainer: ${course.Trainer || "-"}`,
         `Period: ${course.Period || "-"}`,
@@ -1684,22 +1807,7 @@ async function exportPlanPDF(){
         `Duration: ${duration} Weeks`,
         `Branch: ${course.Branch || "-"}`,
         `Section: ${course.Section || "-"}`
-      ];
-
-      let x = 8;
-      let y = 27;
-      details.forEach((txt)=>{
-        const clean = String(txt).slice(0,48);
-        const chipW = Math.min(Math.max(doc.getTextWidth(clean) + 7, 30), 78);
-        if(x + chipW > W - 8){
-          x = 8;
-          y += 7;
-        }
-        doc.setFillColor(...LIGHT);
-        doc.setDrawColor(210,220,235);
-        doc.roundedRect(x, y-4.5, chipW, 6, 1.5, 1.5, "FD");
-        doc.text(clean, x+3, y);
-        x += chipW + 3;
+        ]
       });
 
       const map = plansByCourse[String(course.id)] || {};
@@ -1718,7 +1826,6 @@ async function exportPlanPDF(){
         body.push(row);
       }
 
-      const tableStartY = Math.max(42, y + 6);
       const marginX = 6;
       const usableW = W - (marginX*2);
       const weekW = 18;
@@ -1765,81 +1872,14 @@ async function exportPlanPDF(){
           4:{cellWidth:dayW},
           5:{cellWidth:dayW}
         },
-        didParseCell:function(data){
-
-          if(data.section === "body" && data.column.index > 0){
-
-            const txt = String(data.cell.raw || "").trim().toLowerCase();
-
-            if(txt.includes("final exam") || txt.includes("final")){
-              data.cell.styles.fillColor = [220,53,69];
-              data.cell.styles.textColor = [255,255,255];
-              data.cell.styles.fontStyle = "bold";
-            }
-            else if(txt.includes("midterm exam") || txt.includes("midterm")){
-              data.cell.styles.fillColor = [255,193,7];
-              data.cell.styles.textColor = [0,0,0];
-              data.cell.styles.fontStyle = "bold";
-            }
-            else if(txt.includes("quiz")){
-              data.cell.styles.fillColor = [13,110,253];
-              data.cell.styles.textColor = [255,255,255];
-              data.cell.styles.fontStyle = "bold";
-            }
-            else if(
-              txt.includes("activity") ||
-              txt.includes("reading") ||
-              txt.includes("listening") ||
-              txt.includes("speaking") ||
-              txt.includes("writing") ||
-              txt.includes("vocabulary") ||
-              txt.includes("grammar")
-            ){
-              data.cell.styles.fillColor = [25,135,84];
-              data.cell.styles.textColor = [255,255,255];
-              data.cell.styles.fontStyle = "bold";
-            }
-            else if(txt){
-              data.cell.styles.fillColor = [255,250,225];
-              data.cell.styles.textColor = [35,35,35];
-            }
-          }
-        },
+        didParseCell:applyProfessionalPdfCellStyle,
         didDrawPage:function(){
-          doc.setFontSize(7);
-          doc.setTextColor(120);
-          doc.text("Prudle Institute - Study Plan", marginX, H-6);
-          doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, W-marginX, H-6, {align:"right"});
+          drawProfessionalPdfFooter(doc, "Prudle Institute - Study Plan");
         }
       });
 
-      // ===== Compact color guide =====
       let finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY : tableStartY) + 6;
-
-      if(finalY > H - 20){
-        finalY = H - 18;
-      }
-
-      doc.setFontSize(7.2);
-      doc.setTextColor(0);
-      doc.setFont("helvetica","bold");
-      doc.text("Color Guide:", marginX, finalY);
-
-      const guide = [
-        {c:[220,53,69], t:"Final"},
-        {c:[255,193,7], t:"Midterm"},
-        {c:[13,110,253], t:"Quiz"},
-        {c:[25,135,84], t:"Activity / Skills"}
-      ];
-
-      let gx = marginX + 24;
-      guide.forEach(g=>{
-        doc.setFillColor(...g.c);
-        doc.rect(gx, finalY-4, 4, 4, "F");
-        doc.setTextColor(0);
-        doc.text(g.t, gx+6, finalY);
-        gx += doc.getTextWidth(g.t) + 18;
-      });
+      drawProfessionalPdfGuide(doc, finalY);
 
       await new Promise(resolve => setTimeout(resolve, 15));
     }
@@ -1912,7 +1952,7 @@ function buildSavedPlanDropdown(){
 
     option.value = plan.id;
     option.textContent =
-      `${plan.favorite ? "⭐ " : ""}${plan.locked ? "🔒 " : ""}${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
+      `${plan.favorite ? "⭐ " : ""}${plan.name || "خطة بدون اسم"} — ${Number(plan.duration || 1)} Weeks`;
 
     select.appendChild(option);
   });
@@ -2004,13 +2044,6 @@ function openSavedPlanModal(planId = ""){
     }
   }
 
-  if(selectedPlan?.locked && !canCurrentAdminOpenLockedPlan(selectedPlan)){
-    alertLockedPlanOwner(selectedPlan);
-    ACTIVE_TEMPLATE_ID = null;
-    updateTemplateLockUI(null);
-    return;
-  }
-
   nameInput.value =
     selectedPlan?.name || "";
 
@@ -2028,9 +2061,6 @@ function openSavedPlanModal(planId = ""){
     Number(durationSelect.value),
     selectedPlan?.items || []
   );
-
-  ACTIVE_TEMPLATE_LOCK = selectedPlan || null;
-  updateTemplateLockUI(selectedPlan);
 
   durationSelect.onchange = function(){
     const currentItems =
@@ -2175,12 +2205,6 @@ function collectTemplateItems(skipEmpty = true){
 }
 
 async function saveStudyPlanTemplate(){
-  const currentPlan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
-  if(currentPlan?.locked){
-    alert(`🔒 هذه الخطة مقفلة بواسطة ${currentPlan.lockedByName || currentPlan.lockedBy || "Admin"}. افتح القفل أولاً.`);
-    return;
-  }
-
   const name =
     String(
       document.getElementById("templateName").value || ""
@@ -2259,12 +2283,6 @@ async function deleteSavedPlanTemplate(){
     return;
   }
 
-  const currentPlan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
-  if(currentPlan?.locked){
-    alert(`🔒 لا يمكن حذف الخطة وهي مقفلة بواسطة ${currentPlan.lockedByName || currentPlan.lockedBy || "Admin"}.`);
-    return;
-  }
-
   if(!confirm("هل تريد حذف الخطة المحفوظة؟")){
     return;
   }
@@ -2289,237 +2307,128 @@ async function deleteSavedPlanTemplate(){
   }
 }
 
-
-function normalizeAdminValue(value){
-  return String(value || "").trim().toLowerCase();
-}
-
-function getCurrentAdminNormalized(){
-  return normalizeAdminValue(localStorage.getItem("username"));
-}
-
-function getPlanLockOwner(plan){
-  return normalizeAdminValue(
-    plan?.lockedByUsername ||
-    plan?.lockedByNormalized ||
-    plan?.lockedBy ||
-    ""
-  );
-}
-
-function canCurrentAdminOpenLockedPlan(plan){
-  if(!plan?.locked) return true;
-
-  const currentAdmin =
-    getCurrentAdminNormalized();
-
-  const lockOwner =
-    getPlanLockOwner(plan);
-
-  /*
-    الخطط القديمة التي لا تحتوي مالكًا واضحًا تبقى قابلة للفتح
-    بواسطة Admin حتى لا تضيع على الإدارة.
-  */
-  return !lockOwner || lockOwner === currentAdmin;
-}
-
-function alertLockedPlanOwner(plan){
-  alert(
-    "🔒 هذه الخطة مقفلة ولا يمكن فتحها إلا بنفس المستخدم الذي قام بالقفل.\n\n" +
-    "تم القفل بواسطة: " + (plan?.lockedByName || plan?.lockedBy || "Admin")
-  );
-}
-
-/* نفس التحقق المستخدم في كود الاختبارات: حساب Admin الحالي + USERS */
-async function verifyCurrentAdminPassword(){
-  const currentRole = normalizeAdminValue(localStorage.getItem("role"));
-  const currentUsername = String(localStorage.getItem("username") || "").trim();
-
-  if(currentRole !== "admin"){
-    alert("❌ لا يمكن تنفيذ القفل إلا بواسطة Admin");
-    return null;
-  }
-  if(!currentUsername){
-    alert("❌ لم يتم العثور على اسم Admin المسجل. سجل الدخول مرة أخرى.");
-    return null;
-  }
-
-  const enteredUsername = prompt("اسم مستخدم Admin", currentUsername);
-  if(enteredUsername === null) return null;
-
-  const normalizedCurrent = normalizeAdminValue(currentUsername);
-  const normalizedEntered = normalizeAdminValue(enteredUsername);
-  if(!normalizedEntered || normalizedEntered !== normalizedCurrent){
-    alert("❌ يجب استخدام نفس حساب Admin المسجل حاليًا.");
-    return null;
-  }
-
-  const enteredPassword = prompt("كلمة مرور Admin");
-  if(enteredPassword === null) return null;
-
-  try{
-    let userSnap = await db.collection("USERS")
-      .where("usernameLower", "==", normalizedCurrent)
-      .limit(1)
-      .get();
-
-    /* دعم حسابات USERS القديمة التي لا تحتوي usernameLower */
-    if(userSnap.empty){
-      const allUsers = await db.collection("USERS").get();
-      const matchingDoc = allUsers.docs.find(doc=>{
-        const user = doc.data() || {};
-        return normalizeAdminValue(user.username) === normalizedCurrent;
-      });
-      if(matchingDoc){
-        userSnap = {empty:false, docs:[matchingDoc]};
-      }
-    }
-
-    if(userSnap.empty){
-      alert("❌ لم يتم العثور على حساب Admin في USERS.");
-      return null;
-    }
-
-    const userDoc = userSnap.docs[0];
-    const user = userDoc.data() || {};
-    if(normalizeAdminValue(user.role) !== "admin"){
-      alert("❌ هذا الحساب ليس Admin.");
-      return null;
-    }
-    if(String(user.password || "") !== String(enteredPassword)){
-      alert("❌ كلمة مرور Admin غير صحيحة");
-      return null;
-    }
-
-    return {
-      id:userDoc.id,
-      username:String(user.username || currentUsername).trim(),
-      usernameNormalized:normalizeAdminValue(user.username || currentUsername),
-      fullName:String(user.fullName || "").trim(),
-      displayName:String(user.fullName || user.username || currentUsername).trim()
-    };
-  }catch(error){
-    console.error("ADMIN STUDY PLAN LOCK VERIFICATION ERROR:", error);
-    alert("❌ تعذر التحقق من حساب Admin\n" + (error?.message || String(error)));
-    return null;
-  }
-}
-
-function updateTemplateLockUI(plan){
-  const info = document.getElementById("templateLockInfo");
-  const lockBtn = document.getElementById("templateLockBtn");
-  const saveBtn = document.getElementById("saveTemplateBtn");
-  const deleteBtn = document.getElementById("deleteTemplateBtn");
-  const locked = Boolean(plan?.locked);
-  const owner = String(plan?.lockedByName || plan?.lockedBy || "");
-  if(info){
-    info.classList.toggle("is-locked", locked);
-    info.innerHTML = locked
-      ? `🔒 الخطة مقفلة — Locked by: <b>${escapeHtml(owner || "Admin")}</b>`
-      : "🔓 الخطة غير مقفلة";
-  }
-  if(lockBtn){
-    lockBtn.style.display = plan ? "inline-flex" : "none";
-    lockBtn.innerHTML = locked
-      ? '<i class="fa-solid fa-lock-open"></i> فتح القفل'
-      : '<i class="fa-solid fa-lock"></i> قفل الخطة';
-  }
-  document.querySelectorAll("#templateEditorBox .templateActivity").forEach(el=>el.disabled=locked);
-  const name = document.getElementById("templateName");
-  const duration = document.getElementById("templateDuration");
-  if(name) name.disabled = locked;
-  if(duration) duration.disabled = locked;
-  if(saveBtn) saveBtn.disabled = locked;
-  if(deleteBtn) deleteBtn.disabled = locked;
-}
-
-async function toggleActiveTemplateLock(){
-  if(!ACTIVE_TEMPLATE_ID){ alert("اختر خطة محفوظة أولاً"); return; }
-  const plan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
-  if(!plan){ alert("الخطة غير موجودة"); return; }
-  const admin = await verifyCurrentAdminPassword();
-  if(!admin) return;
-
-  if(plan.locked){
-    const lockOwner = getPlanLockOwner(plan);
-    /* الخطط القديمة التي لا تحتوي مالكًا يمكن للـ Admin الحالي فتحها */
-    if(lockOwner && lockOwner !== admin.usernameNormalized){
-      alert(
-        "❌ لا يمكنك فتح هذه الخطة.\n\n" +
-        "🔒 تم القفل بواسطة: " + (plan.lockedByName || plan.lockedBy || "Admin") + "\n" +
-        "👤 Admin الحالي: " + admin.displayName
-      );
-      return;
-    }
-  }
-
-  try{
-    const ref = db.collection("StudyPlanTemplates").doc(ACTIVE_TEMPLATE_ID);
-    if(plan.locked){
-      await ref.set({
-        locked:false,
-        unlockedBy:admin.displayName,
-        unlockedByUsername:admin.username,
-        unlockedAt:firebase.firestore.FieldValue.serverTimestamp(),
-        lastLockOwner:plan.lockedByName || plan.lockedBy || admin.displayName,
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      },{merge:true});
-      alert("✅ تم فتح قفل الخطة\nAdmin: " + admin.displayName);
-    }else{
-      await ref.set({
-        locked:true,
-        lockedBy:admin.displayName,
-        lockedByName:admin.displayName,
-        lockedByUsername:admin.username,
-        lockedByNormalized:admin.usernameNormalized,
-        lockedByUserId:admin.id,
-        lockedAt:firebase.firestore.FieldValue.serverTimestamp(),
-        unlockedBy:"",
-        unlockedByUsername:"",
-        unlockedAt:null,
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      },{merge:true});
-      alert("🔒 تم قفل الخطة\nAdmin: " + admin.displayName);
-    }
-    const keepId = ACTIVE_TEMPLATE_ID;
-    await loadSavedPlans();
-    ACTIVE_TEMPLATE_ID = keepId;
-    const fresh = SAVED_PLANS.find(p=>p.id === keepId) || null;
-    ACTIVE_TEMPLATE_LOCK = fresh;
-    updateTemplateLockUI(fresh);
-    document.getElementById("savedPlanSelect").value = keepId;
-  }catch(e){
-    console.error(e); alert("حدث خطأ أثناء تحديث قفل الخطة");
-  }
-}
-
 async function exportActiveTemplatePDF(){
-  if(!ACTIVE_TEMPLATE_ID){ alert("اختر خطة محفوظة أولاً"); return; }
-  const plan = SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
-  if(!plan){ alert("الخطة غير موجودة"); return; }
+  if(!ACTIVE_TEMPLATE_ID){
+    alert("اختر خطة محفوظة أولاً");
+    return;
+  }
+
+  const plan =
+    SAVED_PLANS.find(p=>p.id === ACTIVE_TEMPLATE_ID);
+
+  if(!plan){
+    alert("الخطة غير موجودة");
+    return;
+  }
+
   const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
-  const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
-  const BLUE=[22,68,120];
-  let logoData=null; try{logoData=await urlToDataURL(LOGO_URL);}catch(e){}
-  doc.setFillColor(...BLUE); doc.rect(0,0,W,24,"F");
-  if(logoData){doc.setFillColor(255,255,255);doc.roundedRect(8,3,18,17,2,2,"F");doc.addImage(logoData,"PNG",10,5,14,13);}
-  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(17);doc.text("PRUDLE STUDY PLAN",W/2,10,{align:"center"});
-  doc.setFontSize(10);doc.text(String(plan.name||"Saved Study Plan"),W/2,18,{align:"center"});
-  const daysAR=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
-  const daysEN=["Sunday","Monday","Tuesday","Wednesday","Thursday"];
-  const map={}; (plan.items||[]).forEach(i=>map[`${Number(i.week)}_${String(i.day||"")}`]=String(i.activity||""));
-  const body=[]; const duration=Number(plan.duration||1);
-  for(let w=1;w<=duration;w++){const row=[`Week ${w}`];daysAR.forEach(d=>row.push(map[`${w}_${d}`]||""));body.push(row);}
-  const usable=W-12, weekW=18, dayW=(usable-weekW)/5;
-  doc.autoTable({startY:31,head:[["Week",...daysEN]],body,theme:"grid",margin:{left:6,right:6,bottom:15},tableWidth:usable,
-    headStyles:{fillColor:BLUE,textColor:[255,255,255],fontStyle:"bold",halign:"center",fontSize:8},
-    styles:{font:"helvetica",fontSize:7,cellPadding:1.8,halign:"center",valign:"middle",overflow:"linebreak"},
-    columnStyles:{0:{cellWidth:weekW,fontStyle:"bold"},1:{cellWidth:dayW},2:{cellWidth:dayW},3:{cellWidth:dayW},4:{cellWidth:dayW},5:{cellWidth:dayW}},
-    didParseCell(data){if(data.section!=="body"||data.column.index===0)return;const t=String(data.cell.raw||"").toLowerCase();if(t.includes("final")){data.cell.styles.fillColor=[220,53,69];data.cell.styles.textColor=[255,255,255];data.cell.styles.fontStyle="bold";}else if(t.includes("midterm")){data.cell.styles.fillColor=[255,193,7];data.cell.styles.fontStyle="bold";}else if(t.includes("quiz")){data.cell.styles.fillColor=[13,110,253];data.cell.styles.textColor=[255,255,255];data.cell.styles.fontStyle="bold";}else if(t.includes("activity")||t.includes("listening")||t.includes("speaking")||t.includes("writing")||t.includes("grammar")||t.includes("vocabulary")){data.cell.styles.fillColor=[25,135,84];data.cell.styles.textColor=[255,255,255];data.cell.styles.fontStyle="bold";}else if(t){data.cell.styles.fillColor=[255,250,225];}}
+
+  const doc = new jsPDF({
+    orientation:"landscape",
+    unit:"mm",
+    format:"a4",
+    compress:true
   });
-  doc.setFontSize(7);doc.setTextColor(110);doc.text(`Locked by: ${plan.lockedByName||plan.lockedBy||"-"}`,6,H-6);doc.text("Prudle Institute - Study Plan",W-6,H-6,{align:"right"});
-  const safe=String(plan.name||"Study_Plan").replace(/[^a-zA-Z0-9_-]+/g,"_");doc.save(`${safe}.pdf`);
+
+  const W = doc.internal.pageSize.getWidth();
+  const daysAR = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
+  const daysEN = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
+  const duration = Number(plan.duration || 1);
+  const map = {};
+
+  let logoData = null;
+  try{
+    logoData = await urlToDataURL(LOGO_URL);
+  }catch(e){
+    logoData = null;
+  }
+
+  (plan.items || []).forEach(item=>{
+    map[`${Number(item.week)}_${String(item.day || "")}`] =
+      String(item.activity || "");
+  });
+
+  const body = [];
+
+  for(let week = 1; week <= duration; week++){
+    const row = [`Week ${week}`];
+    daysAR.forEach(day=>{
+      row.push(map[`${week}_${day}`] || "");
+    });
+    body.push(row);
+  }
+
+  const startY = drawProfessionalPdfHeader(doc, {
+    logoData,
+    title:"PRUDLE SAVED STUDY PLAN",
+    subtitle:String(plan.name || "Saved Study Plan"),
+    meta:[
+      `Plan: ${plan.name || "-"}`,
+      `Duration: ${duration} Weeks`,
+      `Activities: ${Array.isArray(plan.items) ? plan.items.length : 0}`,
+      `Generated: ${new Date().toLocaleDateString("en-GB")}`
+    ]
+  });
+
+  const marginX = 6;
+  const usable = W - (marginX * 2);
+  const weekW = 18;
+  const dayW = (usable - weekW) / 5;
+
+  doc.autoTable({
+    startY,
+    head:[["Week", ...daysEN]],
+    body,
+    theme:"grid",
+    margin:{left:marginX,right:marginX,bottom:18},
+    tableWidth:usable,
+    pageBreak:"auto",
+    rowPageBreak:"avoid",
+    headStyles:{
+      fillColor:[22,68,120],
+      textColor:[255,255,255],
+      fontStyle:"bold",
+      halign:"center",
+      valign:"middle",
+      fontSize:7.8,
+      cellPadding:2,
+      minCellHeight:7
+    },
+    styles:{
+      font:"helvetica",
+      fontSize:7,
+      cellPadding:1.8,
+      minCellHeight:6.5,
+      halign:"center",
+      valign:"middle",
+      overflow:"linebreak",
+      lineColor:[190,205,225],
+      lineWidth:0.16
+    },
+    alternateRowStyles:{
+      fillColor:[250,252,255]
+    },
+    columnStyles:{
+      0:{cellWidth:weekW,fontStyle:"bold",fillColor:[235,241,250],textColor:[13,47,82]},
+      1:{cellWidth:dayW},
+      2:{cellWidth:dayW},
+      3:{cellWidth:dayW},
+      4:{cellWidth:dayW},
+      5:{cellWidth:dayW}
+    },
+    didParseCell:applyProfessionalPdfCellStyle,
+    didDrawPage:function(){
+      drawProfessionalPdfFooter(doc, "Prudle Institute - Saved Study Plan");
+    }
+  });
+
+  drawProfessionalPdfGuide(doc, (doc.lastAutoTable?.finalY || 46) + 9);
+
+  const safe =
+    String(plan.name || "Study_Plan")
+      .replace(/[^a-zA-Z0-9_-]+/g,"_");
+
+  doc.save(`${safe}.pdf`);
 }
 
 function normalizeTemplateItems(items){
@@ -2692,11 +2601,6 @@ async function applySavedPlanToFilteredCourses(){
     return;
   }
 
-  if(template.locked && !canCurrentAdminOpenLockedPlan(template)){
-    alertLockedPlanOwner(template);
-    return;
-  }
-
   const items =
     Array.isArray(template.items)
       ? template.items
@@ -2843,8 +2747,6 @@ async function applySavedPlanToFilteredCourses(){
 
     <div id="templateEditorBox"></div>
 
-    <div id="templateLockInfo" class="template-lock-info">🔓 الخطة غير مقفلة</div>
-
     <div class="template-actions">
       <button
         id="saveTemplateBtn"
@@ -2859,10 +2761,6 @@ async function applySavedPlanToFilteredCourses(){
         <i class="fa-solid fa-file-pdf"></i> PDF الخطة المحددة
       </button>
 
-      <button id="templateLockBtn" class="template-lock-btn" onclick="toggleActiveTemplateLock()" style="display:none">
-        <i class="fa-solid fa-lock"></i> قفل الخطة
-      </button>
-
       <button
         id="deleteTemplateBtn"
         class="bulk-cancel"
@@ -2873,7 +2771,7 @@ async function applySavedPlanToFilteredCourses(){
       </button>
 
       <button
-        class="logout-badge"
+        class="top-action-btn"
         onclick="createNewSavedPlan()">
         <i class="fa-solid fa-plus"></i>
         خطة جديدة
