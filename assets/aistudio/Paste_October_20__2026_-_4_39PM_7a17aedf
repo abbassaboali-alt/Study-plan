@@ -1,0 +1,1103 @@
+PRUDLE EDUCATION — UNIVERSAL REACT + VITE CONVERSION
+COMPLETE SOURCE-FIRST INSTRUCTIONS — STRICT 1:1 FUNCTIONAL PRESERVATION, CLOUDFLARE WORKER COMPATIBILITY & PRODUCTION SECURITY
+PRIMARY OBJECTIVE
+Convert the attached existing HTML/CSS/JavaScript application into a complete, editable, production-ready React + Vite project.
+These instructions are UNIVERSAL and apply to ANY existing or future HTML/CSS/JavaScript application, regardless of its name, purpose, features, complexity, database collections, user roles, or interface structure.
+They are not limited to any previously mentioned Prudle applications.
+The supplied application's actual working source code is the authoritative reference for the conversion.
+The React version must preserve the original application's design, functionality, business logic, authentication, session behavior, database operations, Cloudflare Worker integration, and external dependencies.
+The only intended changes are:
+1.  Converting the frontend into React + Vite.
+2.  Reorganizing the original frontend logic into maintainable React components and services without changing its behavior.
+3.  Applying compatible production-build security hardening.
+4.  Producing separate compiled production files for deployment.
+Do not redesign, simplify, remove functionality, invent features, change database schemas, or introduce unsupported backend endpoints.
+________________________________________
+1. HIGHEST-PRIORITY SOURCE-OF-TRUTH RULE
+The supplied original application is the authoritative functional specification.
+Before conversion, inspect the entire source and identify:
+• Every HTML element and interface component.
+• Every CSS rule affecting the interface.
+• Every JavaScript function.
+• Every event listener.
+• Every button and its behavior.
+• Every form and validation rule.
+• Every database read, write, update, and delete.
+• Every authentication and authorization check.
+• Every session-storage operation.
+• Every Cloudflare Worker request.
+• Every timer, listener, subscription, and polling mechanism.
+• Every calculation and business rule.
+• Every PDF, Excel, CSV, or other export operation.
+• Every chart, report, filter, and search feature.
+• Every external link and dependency.
+• Every error state, loading state, and notification.
+• Every mobile and responsive behavior.
+Create a complete mapping from the original functionality to the React implementation.
+Never use another application's functions, database structure, interface, or authentication assumptions as a substitute for the supplied source.
+If the original application already contains a Cloudflare Worker integration, preserve its actual working contract.
+If the original application is not yet Worker-integrated but the user explicitly requests compliance with a separate Worker migration specification, follow that specification before or during conversion, and document the architectural change separately.
+If neither condition applies, do not invent or add a Worker integration.
+________________________________________
+2. ABSOLUTE 1:1 DESIGN PRESERVATION
+Preserve the original interface as closely as technically possible.
+This includes:
+• Original colors.
+• Backgrounds and gradients.
+• Borders and shadows.
+• Fonts and typography.
+• Logo and images.
+• Header and footer.
+• Navigation.
+• Buttons and icons.
+• Tables and columns.
+• Cards and panels.
+• Dropdowns.
+• Filters and search boxes.
+• Forms and input fields.
+• Charts and progress indicators.
+• Modals and dialogs.
+• Alerts and notifications.
+• Loading indicators.
+• Spacing and alignment.
+• Responsive layouts.
+• Desktop appearance.
+• Tablet appearance.
+• Mobile appearance.
+• Animations and transitions.
+• Disabled, selected, hover, and active states.
+Reuse the original CSS wherever possible.
+Do not introduce a different design system.
+Do not replace existing buttons with different styles.
+Do not change the original number, order, or placement of interface controls.
+Do not add new navigation, menus, headers, or footers unless separately requested.
+Do not remove existing interface elements.
+Do not change the original application language.
+The final React application must visually match the supplied original application.
+________________________________________
+3. UNIVERSAL APPLICATION COMPATIBILITY
+These instructions must work with any supplied application.
+Do not assume the application contains attendance, grades, courses, evaluations, reports, or any other particular feature.
+Discover the application's functionality from its actual source.
+Preserve its own:
+• Business logic.
+• Calculations.
+• Data relationships.
+• Record types.
+• Database collections.
+• User roles.
+• Permission checks.
+• Status values.
+• Saving mechanisms.
+• Automatic updates.
+• Reporting features.
+• Navigation behavior.
+• Authentication flow.
+• Session lifecycle.
+Do not introduce application-specific behavior from unrelated Prudle projects.
+Do not force a universal polling interval.
+Do not force a universal database schema.
+Do not force a universal set of user roles.
+Do not force a universal list of buttons or components.
+The React architecture may be standardized, but the original application's behavior must remain application-specific.
+________________________________________
+4. CLOUDFLARE WORKER ARCHITECTURE — EXACT COMPATIBILITY
+When the supplied application uses the approved Prudle Cloudflare Worker architecture, preserve that integration exactly.
+Current Prudle Worker reference:
+https://api-prudle.abbassaboali.workers.dev
+Common database endpoint:
+POST /db
+The actual supplied working source and verified deployed Worker contract take priority over generic examples.
+Preserve:
+• The original Worker base URL.
+• The original API routes.
+• HTTP methods.
+• Authentication headers.
+• Request payloads.
+• Response structures.
+• Query filters.
+• Sorting.
+• Pagination.
+• Document paths.
+• Merge behavior.
+• Update behavior.
+• Delete behavior.
+• Retry behavior.
+• Request timeouts.
+• Error handling.
+• Existing API helper functions.
+Where the original contract uses action, preserve action.
+Do not replace it with operation.
+Existing actions may include:
+• query
+• getDoc
+• setDoc
+• updateDoc
+• deleteDoc
+Only use actions supported by the actual deployed Worker.
+Worker Request Example
+const response = await fetch(`${WORKER_URL}/db`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${idToken}`
+  },
+  body: JSON.stringify(payload)
+});
+This example does not authorize changing the original payload or response contract.
+Non-Negotiable Rules
+• Do not invent /me.
+• Do not invent authentication routes.
+• Do not invent database actions.
+• Do not invent response fields.
+• Do not replace Worker requests with direct browser Firestore operations.
+• Do not change database paths for convenience.
+• Do not bypass the Worker.
+• Do not modify the Worker without separate approval.
+If a required operation is unsupported by the verified Worker contract, identify the incompatibility and report it.
+Do not silently replace the operation with a non-equivalent implementation.
+________________________________________
+5. FIREBASE AUTHENTICATION — PRESERVE THE ORIGINAL APPROVED FLOW
+Preserve the authentication architecture used by the supplied application.
+For applications already migrated to the approved Worker-based architecture, retain that architecture.
+Preserve:
+• Firebase authenticated UID.
+• Firebase ID token handling.
+• Existing login flow.
+• Existing logout flow.
+• Existing authentication-state checks.
+• Existing token renewal logic.
+• Existing session storage.
+• Existing authorized-user lookup.
+• Existing username resolution.
+• Existing roles and permissions.
+• Existing redirects.
+• Existing iframe and parent-frame authentication communication.
+• Existing session expiration behavior.
+• Existing error recovery.
+Do not replace the approved authentication flow merely because React provides a different implementation approach.
+Do not initialize a separate Firebase browser Firestore SDK when the original uses Worker-backed database operations.
+Do not introduce unnecessary Firebase configuration files.
+Do not invent new authentication providers.
+Do not create fake authentication states.
+Do not create administrator fallback accounts.
+Firebase API Key and Configuration
+If the approved source uses a Worker-only frontend architecture, do not introduce Firebase browser initialization or Firebase API configuration.
+Do not introduce a Firebase Web API key into the frontend when it is not required by the approved source.
+Firebase Web API keys are public-client configuration, not privileged service-account secrets. Nevertheless, preserve the approved Worker-only design.
+Never place privileged credentials or service-account private keys in React source, public environment variables, or production assets.
+________________________________________
+6. AUTHENTICATED UID, USER LOOKUP, AND ROLE VERIFICATION
+Preserve the exact user identity and authorization process from the supplied source.
+Where the original application uses the USERS collection through the Worker, preserve that same lookup.
+Example of an existing source-specific query:
+{
+  action: "query",
+  collection: "USERS",
+  filters: [
+    {
+      field: "authUid",
+      op: "==",
+      value: verifiedFirebaseUid
+    }
+  ],
+  limit: 1
+}
+Do not force this exact query onto applications that use a different approved lookup.
+Preserve:
+• UID mapping.
+• Username field priority.
+• Existing user profile fields.
+• Role names.
+• Role arrays.
+• Trainer permissions.
+• Manager permissions.
+• Administrator permissions.
+• Student permissions.
+• Course ownership.
+• Record ownership.
+• Existing redirects for unauthorized roles.
+Never trust a role stored in localStorage or sessionStorage as sufficient authorization.
+The Worker must independently enforce the intended permissions for protected database operations.
+Do not grant additional permissions during React conversion.
+Do not remove existing permission checks.
+________________________________________
+7. SESSION MANAGEMENT — EXACT SOURCE COMPATIBILITY
+Preserve the approved session behavior from the original application and the applicable Worker instructions.
+This includes, where present:
+• Session initialization.
+• Session validation.
+• Session expiration.
+• Token renewal.
+• Refresh-token handling.
+• Session persistence.
+• Page reload behavior.
+• Direct-link behavior.
+• Cross-tab behavior.
+• Login redirects.
+• Logout redirects.
+• Session invalidation.
+• Existing iframe messaging.
+• Existing parent-window messaging.
+Session Lifetime
+Do not introduce daily logout unless the approved original architecture requires it.
+If the applicable Worker specification defines a 24-hour session lifetime, preserve that policy.
+Do not restart an absolute session deadline merely because the user refreshes the page.
+Do not invent a different expiration period.
+The backend must enforce the actual security policy where required.
+Token Refresh
+Do not assume /auth/refresh exists.
+Use it only if supported by the verified deployed Worker.
+Preserve the original request body, response parsing, and error handling.
+Where the original architecture uses single-flight token refresh, preserve that behavior.
+Do not trigger multiple simultaneous refresh requests unnecessarily.
+Direct Links and New Tabs
+Preserve the approved session-restoration mechanism.
+If the original application supports opening a protected page directly, the React version must preserve that behavior. First inventory the original session storage keys and timestamp representations; support every verified legacy representation without creating a new session or silently extending its deadline.
+If browser storage-origin restrictions prevent session restoration, report the exact limitation.
+Do not solve direct-link issues by bypassing authentication or placing tokens in URLs.
+Session Security
+Do not introduce new permanent token storage.
+Do not expose refresh tokens through logs, query parameters, or analytics.
+Do not silently change the existing storage architecture during strict 1:1 conversion.
+Report existing token-storage risks separately for an approved security migration.
+________________________________________
+8. PRE-RENDER AUTHENTICATION AND AUTHORIZATION GATE
+Protected application content must not be displayed before successful authentication and authorization.
+Required sequence:
+1.  Initialize the original authentication mechanism.
+2.  Recover or validate the approved session.
+3.  Obtain the authenticated user identity.
+4.  Verify the original user profile where required.
+5.  Verify the original role and access permissions.
+6.  Only then render protected application content.
+Do not show protected tables, records, student information, action buttons, or reports before authorization.
+Override any original intermediate authentication-required screen for protected applications: when the session is missing, expired, revoked, or cannot be restored, immediately redirect to the Prudle login page without displaying an authentication panel, login button, application loader, or protected content. Preserve existing role-based access restrictions.
+Existing Prudle login URL:
+https://www.prudle-education.com/log-in-out
+Do not create a new in-app login interface unless explicitly requested.
+Do not show a partially loaded protected dashboard during authentication.
+Do not leave an infinite spinner when authentication fails.
+Use the original safe error handling where compatible with the mandatory direct-login redirect below. Never mistake a temporary network failure for a confirmed missing session.
+________________________________________
+9. HTTP ERROR HANDLING AND NETWORK RECOVERY
+Preserve the original error-handling behavior.
+HTTP 401 — Unauthorized
+Follow the original token-renewal and retry rules.
+If renewal is unsupported or unsuccessful, apply the original login or session-expiration behavior.
+HTTP 403 — Forbidden
+Treat this as a permission-denied response.
+Do not automatically log out a valid authenticated user solely because an operation returned 403.
+Temporary Network Errors
+Preserve the original retry behavior.
+Do not automatically delete valid session data because of a temporary network failure.
+Timeouts
+Preserve original timeout values.
+Do not leave loading indicators active indefinitely.
+Invalid Responses
+Handle malformed JSON and unexpected response structures safely.
+Do not fabricate successful data.
+Save Failures
+Never display a successful-save message before the server confirms the operation.
+Never silently discard errors.
+Do not falsely report completed database writes.
+________________________________________
+10. FIRESTORE DATABASE — ZERO SCHEMA CHANGES
+Preserve the original database structure exactly.
+This includes:
+• Collection names.
+• Collection capitalization.
+• Document IDs.
+• Document paths.
+• Field names.
+• Field capitalization.
+• Field types.
+• Timestamps.
+• Query filters.
+• Sorting.
+• Pagination.
+• Relationships.
+• Status values.
+• Scores.
+• Attendance values.
+• Comments.
+• Course IDs.
+• Student IDs.
+• Trainer IDs.
+• Saved records.
+Do not create duplicate collections.
+Do not rename fields.
+Do not change existing document paths.
+Do not restructure records.
+Do not migrate records.
+Do not delete existing data outside original authorized functionality.
+Do not change Firestore Security Rules.
+Do not introduce fake records.
+Do not change the backend architecture merely for React convenience.
+________________________________________
+11. PRESERVE ALL DATABASE OPERATIONS
+Identify and preserve every original database operation.
+This includes, where present:
+• Collection queries.
+• Single-document reads.
+• Document creation.
+• Document updates.
+• Document deletion.
+• Merge operations.
+• Batch operations.
+• Auto-save.
+• Save All.
+• Bulk updates.
+• Timestamp handling.
+• Refresh-after-save.
+• Subscriptions.
+• Polling.
+• Pagination.
+• Transaction-like operations.
+Preserve the original operation semantics.
+Do not replace an update with a full overwrite unless that is the original behavior.
+Do not replace an atomic operation with a non-atomic read-modify-write fallback without approval.
+Do not invent a batch endpoint.
+Do not silently truncate query results.
+Do not change server timestamp behavior.
+If the original adapter approximates a server timestamp using browser time, preserve and document that existing behavior rather than silently changing the stored data type.
+If the Worker cannot reproduce a required operation, report the incompatibility.
+________________________________________
+12. POLLING, LISTENERS, AND AUTOMATIC UPDATES
+Preserve the original data-refresh mechanism for each application.
+Do not assume all applications use the same polling interval.
+Preserve:
+• Original polling intervals.
+• Original listener behavior.
+• Original refresh-after-save behavior.
+• Original auto-save delays.
+• Original debounce intervals.
+• Original timeout values.
+• Original retry timing.
+• Original unsubscribe behavior.
+If the source uses a Worker-backed Firebase compatibility adapter, preserve its effective runtime behavior.
+If the source uses a 12-second poller, retain 12 seconds.
+If another source uses 30 seconds, retain 30 seconds.
+If another application uses a different verified mechanism, retain that mechanism.
+These are examples only, not universal defaults.
+React Lifecycle Requirements
+• Clean up timers when components unmount.
+• Cancel or ignore stale requests.
+• Prevent duplicate listeners.
+• Prevent duplicate writes.
+• Prevent duplicate initialization.
+• Prevent previous-user data from appearing after logout.
+• Preserve the original request ordering.
+• Avoid unintended repeated API calls.
+React StrictMode must not cause duplicate database records or repeated writes.
+________________________________________
+13. PRESERVE ORIGINAL BUSINESS LOGIC
+Preserve every original calculation and decision rule.
+Do not change:
+• Grade formulas.
+• Skill calculations.
+• Attendance calculations.
+• Course eligibility rules.
+• Status transitions.
+• Score ranges.
+• Rounding.
+• Date calculations.
+• Week calculations.
+• Time calculations.
+• Filters.
+• Sorting.
+• Validation.
+• Saving conditions.
+• Error conditions.
+• Permission conditions.
+Do not simplify complex functions.
+Do not replace calculations with approximate alternatives.
+Do not introduce additional validation that changes the original allowed behavior unless separately approved.
+Do not remove existing validation.
+________________________________________
+14. PRESERVE ALL EXISTING FEATURES
+Every original feature must remain operational.
+This includes, where present:
+• Login.
+• Logout.
+• Dashboard.
+• Navigation.
+• Forms.
+• Buttons.
+• Search.
+• Filters.
+• Sorting.
+• Tables.
+• Charts.
+• Statistics.
+• Reports.
+• PDF generation.
+• Excel generation.
+• CSV exports.
+• File uploads.
+• File downloads.
+• Notifications.
+• Modals.
+• Comments.
+• Auto-save.
+• Bulk operations.
+• External links.
+• Embedded content.
+• Mobile interactions.
+• Responsive controls.
+Do not remove functionality because it is difficult to migrate.
+Do not replace real functionality with placeholders.
+Do not add demo behavior.
+Do not change legitimate original download buttons.
+________________________________________
+15. LANGUAGE SYSTEM — STRICT ORIGINAL PRESERVATION
+Preserve the original application's language system exactly.
+If the original is English-only, keep it English-only.
+If the original is Arabic-only, preserve Arabic and RTL.
+If the original is bilingual, preserve the existing language-switching mechanism.
+Preserve:
+• Original text.
+• Labels.
+• Button wording.
+• Alerts.
+• Notifications.
+• Language preferences.
+• Text direction.
+• Date formatting.
+• Number formatting.
+Do not add a new Arabic/English switch unless explicitly requested.
+Do not translate database collection names, field names, document IDs, or stored values.
+Language changes are a separate feature request, not part of strict 1:1 migration.
+________________________________________
+16. REACT + VITE ARCHITECTURE
+Create a complete React + Vite project.
+Use reusable components where appropriate without changing the original interface or behavior.
+Recommended structure:
+prudle-react-app/
+├── index.html
+├── package.json
+├── package-lock.json
+├── vite.config.js
+├── scripts/
+│   └── obfuscate-dist.mjs
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   ├── components/
+│   ├── services/
+│   │   ├── authService.js
+│   │   └── workerService.js
+│   ├── utils/
+│   ├── assets/
+│   └── styles.css
+└── dist/
+    ├── index.html
+    └── assets/
+        ├── index-[hash].js
+        └── index-[hash].css
+This structure is illustrative.
+Create only files and components needed by the actual application.
+Do not add unused services.
+Do not add a Worker service to applications that do not use a Worker unless separately requested.
+Do not introduce unnecessary dependencies.
+Preserve the original CSS.
+Preserve all required assets.
+Avoid duplicate authentication initialization.
+Avoid duplicate database requests.
+________________________________________
+17. GITHUB PAGES AND WEBFLOW COMPATIBILITY
+The React application must support the original approved deployment environment.
+For Prudle applications, preserve compatibility with the existing GitHub Pages and Webflow integration where applicable.
+Determine the actual repository name and deployment path.
+Do not assume all applications use the same repository.
+Example Vite configuration:
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  base: "/ACTUAL-REPOSITORY-NAME/",
+  build: {
+    minify: true,
+    sourcemap: false,
+    assetsDir: "assets",
+    cssCodeSplit: true
+  }
+});
+Replace the example repository name with the actual path.
+If the deployment path is unknown, request it before finalizing deployment configuration. For a production build intended to be uploaded as a self-contained directory or GitHub Pages repository root, prefer base: "./" when that matches the actual deployment mode; never blindly force a repository-name base. Validate both root-page navigation and direct embedding separately.
+Preserve original login/logout redirects.
+Preserve original external links.
+Preserve existing iframe behavior where used.
+Preserve existing direct asset embedding where used.
+Webflow Embedding
+If the original application uses an iframe, preserve its authorized messaging and session behavior.
+If it uses direct React asset embedding, ensure the compiled JavaScript, CSS, and initialization work correctly within the actual host.
+Do not weaken authentication to fix embedding.
+Do not invent token-in-URL workarounds.
+If a new build changes hashed asset filenames, provide the updated verified paths for the Webflow embed. Never reuse a previous build’s hashed JS/CSS filenames. Check index.html and the actual dist/assets directory after every build.
+________________________________________
+18. PRODUCTION OUTPUT — INDEX.HTML + SEPARATE ASSETS
+The final production build must generate a normal Vite output.
+Required structure:
+dist/
+├── index.html
+└── assets/
+    ├── index-[hash].js
+    └── index-[hash].css
+Additional runtime assets may be included when required.
+Do not produce a single HTML file containing the entire React application.
+Do not inline all JavaScript into index.html.
+Do not remove the assets directory.
+Do not replace the Vite build with a standalone HTML export.
+Preserve generated hashed filenames and valid asset references.
+The production output must be deployable independently from the editable source project.
+________________________________________
+19. MANDATORY PRODUCTION MINIFICATION
+Enable Vite production minification.
+Required:
+• build.minify = true
+• build.sourcemap = false
+• build.assetsDir = "assets"
+• build.cssCodeSplit = true
+Do not generate production source maps.
+Do not deploy source maps.
+Do not include sourceMappingURL references in production assets.
+Do not expose original source files through the public deployment.
+________________________________________
+20. MANDATORY POST-BUILD JAVASCRIPT OBFUSCATION
+Apply conservative JavaScript obfuscation to production assets only.
+Install javascript-obfuscator as a development dependency.
+Create a complete executable file:
+scripts/obfuscate-dist.mjs
+Configure the normal production build so that it runs:
+1.  vite build
+2.  node scripts/obfuscate-dist.mjs
+Both steps must complete successfully.
+Do not merely describe the obfuscation script.
+Provide its complete implementation.
+Recommended Configuration
+{
+  compact: true,
+  identifierNamesGenerator: "hexadecimal",
+  stringArray: true,
+  stringArrayEncoding: ["base64"],
+  stringArrayThreshold: 0.75,
+  renameGlobals: false,
+  renameProperties: false,
+  selfDefending: false,
+  debugProtection: false,
+  controlFlowFlattening: false,
+  deadCodeInjection: false,
+  sourceMap: false
+}
+Obfuscation Requirements
+• Obfuscate production output only.
+• Never overwrite editable React source.
+• Preserve ES module imports and exports.
+• Preserve dynamic imports.
+• Preserve chunk relationships.
+• Preserve asset references.
+• Preserve Worker requests.
+• Preserve authentication.
+• Preserve original calculations.
+• Preserve all event handlers.
+• Preserve database operations.
+• Preserve charts and reports.
+• Preserve mobile functionality.
+Avoid obfuscating third-party vendor bundles when safe separation is possible.
+If a compatibility issue occurs, reduce or scope the obfuscation and rebuild.
+Do not disable original functionality to make obfuscation succeed.
+Do not enable aggressive anti-debugging, infinite loops, or browser blocking.
+Obfuscation makes frontend code harder to read but does not make browser-delivered JavaScript impossible to extract.
+________________________________________
+21. APPROVED HOST PROTECTION
+Preserve existing approved-host restrictions where applicable.
+For the current Prudle deployment, approved production hosts may include:
+• prudle-education.com
+• www.prudle-education.com
+• abbassaboali-alt.github.io
+Only use hosts actually approved for the supplied application.
+Require HTTPS in production.
+Where compatible with the original deployment, place the host guard before React initialization in the deployed index.html.
+Do not break local Vite development.
+Do not break legitimate Webflow embedding.
+Do not break the approved GitHub Pages path.
+If the host is unauthorized, prevent protected application initialization and redirect to the approved Prudle login page; do not display the protected interface.
+Optional Casual-Copy Deterrents
+Where already approved:
+• Intercept Ctrl+S.
+• Intercept Cmd+S.
+• Preserve existing limited context-menu restrictions.
+Do not disable the entire right-click menu unless explicitly requested.
+Do not claim that Ctrl+U, View Page Source, F12, or browser Developer Tools can be completely disabled.
+Client-side host checks are not authentication or authorization controls.
+________________________________________
+22. REAL BACKEND SECURITY
+All sensitive database operations must be authorized by the trusted backend.
+Where the application uses the Prudle Worker, verify that the Worker enforces:
+• Valid Firebase identity.
+• Authorized UID.
+• Allowed user role.
+• Course ownership.
+• Record ownership.
+• Permitted document paths.
+• Permitted operations.
+• Appropriate writable fields.
+A valid bearer token alone does not authorize access to every record.
+Frontend filters do not replace backend permission checks.
+CORS and approved-host restrictions do not replace backend authorization.
+Do not change Firestore Security Rules to public access.
+Do not modify the existing Worker without approval.
+If the Worker security policy cannot be inspected or tested, report it as NOT VERIFIED.
+________________________________________
+23. SAFE REACT RENDERING AND XSS PROTECTION
+Use normal React text rendering for user-provided and database-provided content.
+Preserve React's escaping behavior.
+Avoid:
+• dangerouslySetInnerHTML
+• Untrusted innerHTML
+• document.write
+• eval
+• new Function
+• Unsafe dynamic script injection.
+• javascript: URLs.
+If an original feature genuinely requires rich HTML, use a maintained sanitizer with an appropriate allowlist and test the feature.
+Validate dynamic link destinations.
+Do not display authentication tokens or privileged credentials in production logs, alerts, or reports.
+Do not introduce security changes that silently remove legitimate original functionality.
+________________________________________
+24. CONTENT SECURITY POLICY AND DEPLOYMENT HEADERS
+Where supported by the actual deployment host, use appropriate security headers.
+Consider:
+• Content-Security-Policy.
+• Referrer-Policy.
+• X-Content-Type-Options.
+• Appropriate framing restrictions.
+Any policy must remain compatible with the actual application.
+Test:
+• React assets.
+• Cloudflare Worker connections.
+• Authentication.
+• Webflow embedding.
+• GitHub Pages.
+• Charts.
+• PDF generation.
+• External libraries.
+• Media and downloads.
+Do not claim custom response headers are active merely because they are mentioned in React code.
+GitHub Pages does not provide arbitrary custom response-header configuration.
+Report hosting-level changes that require separate authorization.
+________________________________________
+25. SOURCE-CODE PRIVACY AND PUBLIC DEPLOYMENT
+Keep the editable React project private.
+The owner must receive the complete editable project.
+Do not upload the following to a public GitHub Pages deployment:
+• Original HTML source.
+• React src directory.
+• Developer ZIP.
+• Source maps.
+• Service-account credentials.
+• Private keys.
+• .env secrets.
+• Build scripts.
+• node_modules.
+• Internal development notes.
+• Unnecessary source files.
+Deploy only the required compiled runtime files from dist.
+If using a public GitHub Pages repository, publish the compiled production output only.
+Keep the complete editable project in private storage or a private repository.
+Never claim that publicly delivered frontend JavaScript is fully hidden.
+________________________________________
+26. NO FAKE DATA OR DEMO FUNCTIONALITY
+Do not introduce:
+• Demo mode.
+• Mock students.
+• Fake trainers.
+• Sample courses.
+• Placeholder records.
+• Test administrators.
+• Fake authentication.
+• Simulated successful saves.
+• Mock Worker responses.
+• Nonfunctional buttons.
+• Incomplete database services.
+• Placeholder reports.
+Use the actual original application data sources.
+Preserve existing legitimate records.
+Do not fabricate data to make the interface appear functional.
+________________________________________
+27. NO DEVELOPER-ONLY BUTTONS IN PRODUCTION
+Do not add the following controls to the actual application:
+• Download Project ZIP.
+• Download Source Code.
+• Export React Project.
+• Developer Tools.
+• Debug Controls.
+• Test Login.
+• Preview Mode.
+• Security Configuration.
+The developer ZIP must be provided separately.
+Do not insert a project-download button into the React interface.
+Preserve all legitimate original PDF, Excel, CSV, and report-download controls.
+Do not remove original buttons.
+________________________________________
+28. COMPLETE ORIGINAL-TO-REACT TRACEABILITY MATRIX
+Before final delivery, create a traceability matrix.
+For each original function, event handler, and important side effect, record:
+1.  Original function or feature.
+2.  Original source location.
+3.  React equivalent.
+4.  Original Worker or database operation.
+5.  React Worker or database operation.
+6.  Original UI behavior.
+7.  React UI behavior.
+8.  Original saved fields.
+9.  React saved fields.
+10. Test result.
+Allowed test statuses:
+• PASS
+• FAIL
+• NOT VERIFIED
+Every important original feature must be accounted for.
+Do not omit functions from the comparison.
+Do not claim complete equivalence based only on successful compilation.
+________________________________________
+29. MANDATORY FUNCTIONAL ACCEPTANCE TESTS
+Test the final obfuscated production build.
+Verify:
+1.  Original desktop layout.
+2.  Original tablet layout.
+3.  Original mobile layout.
+4.  Original logo and images.
+5.  Original buttons.
+6.  Original forms.
+7.  Original filters.
+8.  Original search.
+9.  Original tables.
+10. Original charts.
+11. Original calculations.
+12. Original reports.
+13. Original PDF and export functions.
+14. Original navigation.
+15. Authentication.
+16. Authorized user lookup.
+17. Role verification.
+18. Session expiration.
+19. Token renewal where supported.
+20. Logout.
+21. Direct-link behavior.
+22. Iframe behavior where used.
+23. Worker request payloads.
+24. Worker response parsing.
+25. Database reads.
+26. Database writes.
+27. Database updates.
+28. Database deletes.
+29. Error handling.
+30. Network timeouts.
+31. HTTP 401 behavior.
+32. HTTP 403 behavior.
+33. Polling intervals.
+34. Refresh-after-save behavior.
+35. Timer cleanup.
+36. Prevention of duplicate writes.
+37. Correct repository base path.
+38. Production asset loading.
+39. Source-map absence.
+40. JavaScript obfuscation compatibility.
+Where backend credentials or a running environment are unavailable, mark affected tests NOT VERIFIED.
+Do not report PASS without actual verification.
+________________________________________
+30. MANDATORY BUILD VERIFICATION
+Run:
+npm install
+npm run build
+Verify that:
+• The commands succeed.
+• dist/index.html exists.
+• dist/assets exists.
+• JavaScript files are generated.
+• CSS files are generated where styles exist.
+• Asset filenames and references match.
+• The repository base path is correct.
+• No source maps are generated.
+• No sourceMappingURL references remain.
+• Production JavaScript is actually obfuscated.
+• React imports and exports remain functional.
+• Worker calls remain functional.
+• Authentication remains functional.
+• No privileged secrets are exposed.
+• No original editable source is accidentally included in public output.
+If a build fails, fix the build without changing original functionality.
+Rebuild after every modification.
+Do not provide an untested build as verified production-ready.
+________________________________________
+31. REQUIRED DELIVERABLES
+Provide two distinct deliverables whenever the environment supports them.
+A. COMPLETE EDITABLE REACT PROJECT
+Provide a downloadable ZIP containing:
+• index.html
+• package.json
+• package-lock.json
+• vite.config.js
+• src/main.jsx
+• src/App.jsx
+• All required React components.
+• Original CSS.
+• Original assets.
+• Authentication services where required.
+• Worker services where required.
+• Utilities.
+• Supporting libraries.
+• Complete working obfuscation script.
+• Build scripts.
+• All required project configuration.
+The owner must be able to edit, maintain, and rebuild the application.
+Do not provide incomplete snippets.
+Do not replace missing functions with placeholders.
+B. PRODUCTION DEPLOYMENT FILES
+Provide a separate deploy-ready ZIP or folder containing:
+index.html
+assets/
+    *.js
+    *.css
+Include other required runtime files only when necessary.
+Production JavaScript must be minified and obfuscated only after confirming the final transformed modules still load and execute. If obfuscation breaks the runtime, fix or narrow it and rebuild; do not deliver a syntactically valid but nonfunctional bundle.
+Source maps must be disabled.
+Do not include editable React source.
+Do not include developer-only controls.
+Do not include the developer ZIP in the deployed application.
+________________________________________
+32. REQUIRED FINAL TECHNICAL REPORT
+After completing the conversion, provide a concise report containing:
+1.  Application name.
+2.  Original source file.
+3.  React project structure.
+4.  Authentication architecture preserved.
+5.  Worker endpoints preserved.
+6.  Database collections preserved.
+7.  Original functionality preserved.
+8.  Session behavior.
+9.  Build result.
+10. Obfuscation result.
+11. Generated asset filenames.
+12. Tests passed.
+13. Tests failed.
+14. Tests not verified.
+15. Any intentional differences.
+16. Any unresolved incompatibilities.
+17. Backend security limitations.
+18. Deployment instructions.
+Do not claim that the application has been deployed unless deployment actually occurred.
+Do not claim backend security was verified unless the backend was inspected or tested.
+Do not claim 100% identical functionality without adequate runtime testing.
+________________________________________
+33. FAILURE AND INCOMPATIBILITY POLICY
+If the exact original behavior cannot be reproduced:
+1.  Identify the affected feature.
+2.  Identify the original behavior.
+3.  Identify the technical incompatibility.
+4.  Determine whether the issue is caused by React, Vite, the Worker contract, authentication, browser restrictions, or deployment.
+5.  Preserve unaffected functionality.
+6.  Do not silently substitute an approximation.
+7.  Do not fabricate success.
+8.  Report the affected feature as FAIL or NOT VERIFIED.
+9.  Request separate approval before making architectural or business-logic changes.
+Never weaken authentication to make an application load.
+Never expose credentials to make a Worker request succeed.
+Never remove security checks to resolve compatibility issues.
+Never alter database structure without authorization.
+________________________________________
+34. FINAL NON-NEGOTIABLE REQUIREMENTS
+The conversion must satisfy all of the following:
+SOURCE FIDELITY
+Preserve the supplied application's original design, interface, functionality, business logic, calculations, reports, navigation, and responsive behavior.
+AUTHENTICATION FIDELITY
+Preserve the approved authentication, UID mapping, roles, session lifecycle, login, logout, token renewal, and authorization behavior.
+WORKER FIDELITY
+Where the original application uses Cloudflare Worker, preserve its verified endpoints, request payloads, response handling, and database operations exactly.
+DATABASE FIDELITY
+Preserve collection names, document paths, field names, data types, relationships, and saving behavior.
+SECURITY
+Do not introduce privileged credentials, authentication bypasses, unauthorized database access, or unnecessary direct Firebase browser connections.
+REACT ARCHITECTURE
+Produce a complete editable React + Vite project with all original functionality.
+PRODUCTION HARDENING
+Use minification, disabled source maps, tested conservative JavaScript obfuscation, and private source-code storage.
+DEPLOYMENT OUTPUT
+Generate separate index.html and compiled assets files with correct deployment paths.
+VERIFICATION
+Test the final production build and accurately report PASS, FAIL, and NOT VERIFIED results.
+UNIVERSAL APPLICABILITY
+These instructions apply to ANY supplied HTML/CSS/JavaScript application. No specific application name, database collection, polling interval, role, button, or feature is assumed unless present in the supplied original source.
+________________________________________
+FINAL EXECUTION COMMAND
+Convert the attached application into a complete React + Vite project using strict source-first 1:1 migration.
+Preserve the supplied application's actual functionality and visual design without unauthorized changes.
+Retain the approved Cloudflare Worker and Firebase Authentication architecture wherever it exists in the supplied source.
+Do not invent endpoints, database fields, authentication mechanisms, or application features.
+Apply compatible production security hardening.
+Generate:
+1.  A complete editable React project ZIP.
+2.  A separate hardened production build containing index.html and compiled assets.
+3.  A function-by-function verification report.
+THE FINAL REACT APPLICATION MUST BE FUNCTIONALLY AND VISUALLY EQUIVALENT TO ITS SUPPLIED ORIGINAL APPLICATION, WHILE PRESERVING THE VERIFIED BACKEND CONTRACT AND APPLYING ONLY COMPATIBLE, AUTHORIZED PRODUCTION HARDENING.
+
+________________________________________
+35. MANDATORY UNIVERSAL REACT AUTHENTICATION GATE — IMMEDIATE LOGIN REDIRECT
+PRIORITY: This section overrides earlier language about preserving an authentication-required screen, intermediate login UI, or indefinite loading. It applies to EVERY protected Prudle React/Vite application converted under this specification, irrespective of the original application's name or functionality. It does not turn a deliberately public page or the Prudle login page itself into a protected page.
+
+35.1 EXACT REQUIRED BEHAVIOR
+- LOGIN_URL = https://www.prudle-education.com/log-in-out
+- On direct navigation, reload, new tab, or opening a bookmark, start with protected React UI unmounted and invisible.
+- Check the approved existing session restoration method BEFORE rendering App's protected components or starting any protected data fetch, listener, or timer.
+- If no recoverable session credential exists, immediately call window.location.replace(LOGIN_URL), without displaying ANY application content, login form, logout button, authentication panel, "Authentication Required" notice, "Go to Login" button, or loading spinner.
+- If a stored session is known to be expired, revoked, or invalid and cannot be refreshed according to the verified backend contract, remove ONLY Prudle-owned session credentials, stop protected activity, and immediately redirect with location.replace(LOGIN_URL).
+- If the session is recoverable, complete token validation and existing UID/user/role authorization checks; render the original protected UI only after success.
+- If the user is authenticated but lacks permission, do NOT broaden access or create a login loop. Preserve a safe authorization-denied outcome and the existing approved role policy.
+- If a credential exists but the network is temporarily unavailable, do not treat this as confirmed logout: show only a minimal non-sensitive connection failure/retry state, never protected UI, and never an endless loader.
+- If authentication validation hangs, apply a finite timeout; on timeout distinguish unavailable network from invalid credentials, and terminate bootstrap in a safe state.
+- Do not add an application-level Logout button if the original application intentionally has none.
+
+35.2 REACT IMPLEMENTATION ORDER
+- In index.html, keep only the minimal root mount and authorized early host guard; do not render original protected HTML before React mounts.
+- In src/main.jsx and/or the top-level auth boundary, default to a non-authorized state. Do not render protected <App /> while authentication is unresolved.
+- An immediately missing session must trigger redirect before mounting protected components. A temporary blank root during redirect is acceptable; a visible authentication panel or loading UI is not.
+- Put all protected fetches and subscriptions behind the validated authentication boundary. Avoid an effect that starts protected requests before session validation.
+- Use a single auth bootstrap with cleanup/abort handling; prevent React StrictMode from triggering duplicate redirects, token refreshes, database writes, or subscriptions.
+- Keep token and UID resolution aligned with the existing Worker authentication architecture. A browser-supplied UID or role is not proof of authorization; verify with the Worker.
+- Use the same centralized session service for React routes, Worker calls, and cross-tab restoration; do not scatter conflicting token-storage logic across components.
+- Do not place ID tokens or refresh tokens in URLs, HTML, source code, console messages, or error screens.
+- Do not hardcode privileged Firebase secrets or add Firebase browser configuration when the approved architecture is Worker-only.
+
+35.3 SESSION AND 24-HOUR COMPATIBILITY
+- Respect the actual approved Prudle session architecture and its verified deployed Worker routes. Do not invent /auth/refresh, /auth/session, /me, or any other endpoint.
+- If the approved backend supports token refresh, renew the short-lived Firebase ID token through that verified route and preserve the existing Firebase UID. Token refresh must NOT reset the original absolute 24-hour session deadline.
+- An absolute 24-hour deadline must be enforced server-side to qualify as a security guarantee. A browser-only timestamp is a UX guard, not authoritative authorization.
+- Do not replace a recoverable session with daily loginDate !== today logout. Preserve loginDate as legacy metadata when needed.
+- Direct links and new tabs must work while a valid recoverable session exists; sessionStorage alone is tab-scoped. Do not silently move refresh tokens into localStorage; follow the separately approved storage/security architecture.
+- Canonicalize prudle-education.com and www.prudle-education.com consistently before session storage access. Treat GitHub Pages iframe origins as separate origins; validate exact message origins if existing approved messaging is used.
+- HTTP 401 caused by verified token expiry may invoke at most one supported refresh and a safe retry. HTTP 403 means denied permission, not a generic token-refresh or logout trigger. Never retry ambiguous writes without idempotency assurance.
+- On logout or confirmed session expiry, clear app-owned credentials across the stores actually used and stop protected requests/listeners.
+
+35.4 REQUIRED REACT ACCEPTANCE TESTS
+1. No session: open protected app URL directly -> immediate login redirect, no app UI, no loader, no authentication panel.
+2. Expired/revoked session: cleanup and immediate login redirect without protected-content flash.
+3. Valid session: original app opens normally and all original authorized features work.
+4. Valid recoverable session: page refresh and opening a copied URL in a new tab work within supported session lifetime.
+5. HTTP 401 token expiry: refresh only if supported and safe; otherwise login redirect.
+6. HTTP 403 role denial: no privilege escalation, no infinite redirect or refresh loop.
+7. Temporary Worker outage or timeout: bounded safe connection/retry state, no protected content, no infinite spinner, no incorrect forced logout.
+8. Cross-origin iframe/direct asset embed: real parent and child origin/session handoff is tested, not assumed.
+9. React StrictMode: no duplicate database writes, subscriptions, or authentication requests caused by effect replay.
+10. Production dist/index.html + hashed assets: the pre-render gate still works after minification and obfuscation.
+11. Session deadline: verify server-side 24-hour enforcement separately or explicitly mark NOT VERIFIED.
+12. Do not mark any test PASS without actually executing it; use NOT VERIFIED when the deployed environment or credentials are unavailable.
+
+35.5 DELIVERABLES AND REPORT
+- Deliver the COMPLETE original-to-React project and the separate production dist with index.html and assets/*.js, assets/*.css as required by sections 16–31.
+- Include the complete actual auth gate/session service in the editable React source, not only pseudocode or snippets.
+- Document the verified deployed Worker endpoints, token-storage approach, login-page dependencies, iframe/origin dependencies, and whether 24-hour expiry is truly server-enforced.
+- Never claim authentication is functional merely because npm run build succeeds.
+
+FINAL OVERRIDING RULE: A protected React application with no valid recoverable Prudle session MUST redirect directly to https://www.prudle-education.com/log-in-out BEFORE rendering protected UI. No intermediate authentication page, buttons, or infinite loading. Preserve the original application's complete functionality once authorized.
+
+________________________________________
+36. MANDATORY UNIVERSAL FIXES — LESSONS FROM THE WORKING STUDENT FOLLOW-UP REACT BUILD
+PRIORITY: This section is a binding clarification of sections 4–8, 16–21, 29–35 for EVERY future Prudle React conversion. It is application-independent. Never copy the Student Follow-up UI, collections, filenames, or data logic into another app. The goal is to prevent a technically successful React build from failing to start after deployment.
+
+36.1 ESTABLISH A WORKING BASELINE BEFORE REACT CONVERSION
+- Inspect the complete supplied original application and the actual working deployment example, if provided.
+- Distinguish the original HTML application, the compiled React build, the host page, and the deployed Worker. Do not assume that a problem in one is caused by another.
+- Inventory exact runtime session keys, original login/logout behavior, Worker requests, UID mapping, timestamp formats, domain/origin assumptions, script order, and asset paths.
+- Record whether the app is hosted directly at GitHub Pages, inside an iframe, or mounted through JS/CSS tags in Webflow; these are distinct environments.
+- Do not infer success merely from the original page loading or from npm run build passing.
+
+36.2 SESSION TIMESTAMP NORMALIZATION — NO FALSE LOGOUTS
+- Read the approved session-start value from the actual storage keys used by the existing login system; inspect BOTH localStorage and sessionStorage only where the original architecture already uses them.
+- Recognize, when present in the approved original system: integer millisecond Unix timestamps, integer second Unix timestamps, numeric strings, ISO-8601 strings, and documented legacy date formats.
+- Normalize valid timestamps to epoch milliseconds before computing the session deadline. Reject impossible dates, NaN, nonfinite values, and future timestamps beyond reasonable clock skew.
+- Use a single shared parser in the auth service; never scatter contradictory Date.parse(), Number(), or new Date() assumptions through components.
+- If the approved system has an absolute 24-hour session, calculate expiresAt = originalAuthenticatedSessionStart + 24*60*60*1000. Page reloads, React remounts, token refreshes, or new tabs MUST NOT reset that start time.
+- Do not use legacy loginDate !== today as a new logout requirement when the approved system uses a 24-hour deadline. Preserve loginDate as metadata if needed.
+- If no trustworthy start time exists, do NOT create a fresh 24-hour window. Use only a verified backend session-restoration/validation flow, otherwise treat the session as unrecoverable and redirect to login.
+- A timestamp stored in the browser is not an authoritative security guarantee; server-side absolute expiry must be independently verified. If unverified, report SERVER-SIDE 24-HOUR ENFORCEMENT NOT VERIFIED.
+- A short-lived Firebase ID token expiry is different from the absolute Prudle session expiry. Refresh only through an existing, verified flow; never invent a route or persist a refresh token for convenience.
+- On transient network failure, preserve valid credentials and show only a safe bounded connection/retry state. On confirmed invalid/revoked session, clear only app-owned credentials and redirect.
+
+36.3 STRICT HOST ALLOWLIST — PRODUCTION VS DEVELOPMENT
+- Derive the approved production hostnames from the actual app configuration. Current common production examples are prudle-education.com, www.prudle-education.com, and abbassaboali-alt.github.io; inclusion must still be authorized for the specific app.
+- Require HTTPS for production hosts. Do not use permissive substring checks such as hostname.includes('github'), hostname.includes('webcontainer'), or hostname.endsWith('.run.app').
+- Development bypass, when explicitly needed, must be limited to exact localhost or 127.0.0.1 with a documented dev-only mode, and must never be treated as proof of user authorization.
+- For unauthorized production hosts, prevent protected app initialization and use the approved redirect. Never use host checks as a substitute for Worker-side UID and role authorization.
+- Verify the origin of postMessage-based authentication before accepting data. GitHub Pages and Webflow do not share localStorage or sessionStorage across origins.
+
+36.4 CORRECT INDEX.HTML, ASSET PATHS, AND DEPLOYMENT LAYOUT
+- Build the app with Vite and verify the actual generated output; do not hand-invent hashed filenames.
+- Deliver the deployable folder with index.html at its root and all referenced assets under assets/. Keep the filenames exactly as emitted by that same build.
+- For portable, self-contained deployment where applicable, configure Vite base: './' and confirm that index.html uses relative ./assets/... references. For a fixed repository path, use its verified correct base instead. The base must match the real deployment mode.
+- If embedding the compiled JS/CSS directly into a Webflow page, use absolute URLs pointing to the same deployed build and the exact current hashed filenames. Ensure the module script, stylesheet, and root mount are all present in the Webflow page.
+- Distinguish loading an HTML page in an iframe from injecting its assets into Webflow: relative imports, root element, CSS cascade, storage origin, and auth handoff differ.
+- Preserve Vite-generated modulepreload and chunk imports; do not rename assets independently of index.html or rewrite import paths blindly.
+- Test both a fresh browser session and a hard refresh to detect old cached index.html referencing deleted hashed assets. Use coherent deployment/caching so index and assets come from the same build.
+- Do not deploy a ZIP archive as a single file. Extract its contents so index.html and assets/ are actual deployed files.
+
+36.5 PRE-RENDER AUTH GATE WITHOUT AUTHENTICATION REGRESSION
+- Keep protected React UI unmounted and hidden until the approved authentication flow and backend authorization finish.
+- If credentials are definitely missing, redirect directly to the approved login URL with no intermediate app/login screen.
+- If credentials are present, attempt only the approved validation and recovery flow; do not force a redirect merely because one legacy timestamp parser fails before checking supported formats.
+- Confirm authenticated UID through the verified token/Worker, then verify the app's own user record and role. Never treat a client-stored UID or role as sufficient authorization.
+- Do not add new authentication routes, browser Firebase configuration, or a new logout button where none existed.
+- Prevent StrictMode/effect replay from starting duplicate initialization, refreshes, listeners, or writes.
+- Differentiate confirmed 401 invalidity, 403 permission denial, temporary connectivity errors, and unavailable Worker; do not create infinite redirects or spinners.
+
+36.6 REACT CONVERSION MUST PRESERVE ACTUAL APPLICATION OPERATIONS
+- Map every original function, event, timer, query, mutation, field name, calculation, PDF/export action, and permission rule to the React equivalent.
+- Keep the existing Worker payload/response contract and its exact authentication headers. Do not invent /me, /auth/refresh, or unsupported database actions.
+- Preserve polling intervals and unsubscribe behavior as implemented in the original application; do not impose a universal 12-second or 30-second interval.
+- Use AbortController or equivalent cancellation where appropriate and ensure stale requests cannot overwrite a new user's data.
+- Ensure database writes are confirmed by the backend before reporting success. Never change partial updates to full overwrites or atomic writes to non-atomic fallbacks without approval.
+- Keep the original CSS and UI structure as closely as React permits; avoid introducing global resets that change original visual behavior.
+
+36.7 OBFUSCATION COMPATIBILITY IS A FUNCTIONAL RELEASE GATE
+- Obfuscate only the compiled JS after a successful production build. Preserve ES module syntax, Vite chunks, imports, React runtime, and network calls.
+- Do not use aggressive anti-debugging, control-flow flattening, or settings that interfere with app startup. Prefer scoped/conservative obfuscation and leave vendor chunks alone when feasible.
+- Run JavaScript syntax checks where possible, but syntax validation ALONE is not enough: run the final obfuscated dist in a real browser or browser-equivalent environment and inspect module load errors and startup behavior.
+- If obfuscation prevents loading, adjust the obfuscation configuration and rebuild, not the original business logic or authentication policy.
+
+36.8 REQUIRED PRE-DELIVERY TEST MATRIX FOR EVERY APPLICATION
+Report each case as PASS, FAIL, or NOT VERIFIED, never assume PASS:
+1. npm install and npm run build succeed.
+2. dist/index.html exists, dist/assets/*.js exists, and CSS assets exist when styles require them.
+3. Every asset reference in index.html resolves to a file in that exact dist build.
+4. Vite base and deployed GitHub Pages repository/subdirectory match.
+5. Fresh load and hard reload work without 404, MIME-type errors, or stale chunk imports.
+6. The final obfuscated JS executes; React mounts into the correct root.
+7. No valid session: immediate login redirect, no protected UI flash.
+8. Valid original session: page opens and the original app UI renders.
+9. Approved session-start formats (milliseconds, seconds, numeric string, ISO, and any verified legacy formats) parse correctly.
+10. 24-hour expiry is measured from the ORIGINAL login, never from page reload or token refresh.
+11. Missing/invalid timestamp does not silently create a new 24-hour session.
+12. Firebase token renewal only uses a verified route and does not reset the absolute deadline.
+13. Confirmed 401 and 403, Worker timeout, and offline conditions have distinct safe outcomes.
+14. UID and role verification is performed through the approved Worker/backend, not merely localStorage.
+15. GitHub Pages direct URL works under the actual hosting path.
+16. Webflow iframe OR direct JS/CSS embed works in the actual chosen mode; origin messaging is validated.
+17. Logout clears only relevant Prudle session state and redirects correctly if logout existed originally.
+18. All original reads, writes, deletes, filters, reports, exports, and calculations behave equivalently.
+19. Desktop, tablet, and mobile layouts retain original behavior.
+20. No accidental source maps, privileged secrets, test buttons, or editable source files in public dist.
+21. Backend ownership and server-side 24-hour enforcement are VERIFIED separately or explicitly marked NOT VERIFIED.
+
+36.9 REQUIRED DELIVERY PACKAGE AND DIAGNOSTICS
+- Provide (A) a complete editable React/Vite source ZIP, (B) a separate production ZIP with index.html and assets/, and (C) a concise conversion report and traceability matrix.
+- Include the exact output asset filenames and actual deployment base. If a Webflow embed is applicable, provide its exact updated tags using the verified asset filenames.
+- Report which runtime scenarios were actually tested and which require user/deployed-environment testing. Do not claim a browser test when only a build or syntax check was performed.
+- If the user supplies a previously working React build, use it to identify compatible patterns, but do not copy its app-specific data schema, UI, or business logic into the new application.
+- NEVER fix a React startup issue by bypassing UID checks, loosening Worker authorization, ignoring a confirmed expired session, exposing tokens, or opening Firestore rules.
+
+FINAL OVERRIDING INSTRUCTION FOR ALL FUTURE CONVERSIONS:
+A successful React conversion is NOT defined only by a completed Vite build. It must also have internally consistent production assets, the correct deployment base, a verified and compatible session parser, an authorized pre-render gate, a functioning obfuscated runtime, and strict preservation of the supplied application's actual business logic and Worker contract. If any runtime condition cannot be tested, state NOT VERIFIED rather than asserting success.
+
+

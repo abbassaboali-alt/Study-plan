@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الخطة الدراسية – الإدارة</title>
+    <meta name="description" content="نظام إدارة وتوزيع الخطط الدراسية الأسبوعية لمعهد برودل التعليمي، مع إمكانية التعديل الفردي والجماعي، إدارة وتطبيق القوالب المحفوظة، وتصدير تقارير PDF احترافية." />
+    <meta property="og:title" content="الخطة الدراسية – الإدارة" />
+    <meta property="og:description" content="نظام إدارة وتوزيع الخطط الدراسية الأسبوعية لمعهد برودل التعليمي، مع إمكانية التعديل الفردي والجماعي، إدارة وتطبيق القوالب المحفوظة، وتصدير تقارير PDF احترافية." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Fonts & Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Approved Host Guard & Early Shortcut Deterrent -->
+    <script>
+      (function(){
+        "use strict";
+        const LOGIN = "https://www.prudle-education.com/log-in-out";
+        const allowed = new Set(["www.prudle-education.com", "prudle-education.com", "abbassaboali-alt.github.io"]);
+        const host = location.hostname.toLowerCase();
+        const isDev = host === "localhost" || host === "127.0.0.1" || host.includes(".run.app");
+        if(!isDev && (location.protocol !== "https:" || !allowed.has(host))){
+          window.stop();
+          location.replace(LOGIN);
+          return;
+        }
+        window.addEventListener("keydown", function(e){
+          if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s"){
+            e.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-D6l6tQpE.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-38XIygmF.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
